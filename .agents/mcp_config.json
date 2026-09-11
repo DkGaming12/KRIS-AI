@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "omniroute": {
+      "command": "node",
+      "args": ["/Users/yacht/Documents/Project/Omni/bin/omniroute.mjs", "--mcp"],
+      "env": {}
+    }
+  }
+}
