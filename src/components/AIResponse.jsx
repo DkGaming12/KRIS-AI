@@ -1,11 +1,64 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Save, ChevronRight, RefreshCw, Check, Sparkles } from 'lucide-react';
 
+function extractWebPreview(content) {
+  const htmlFence = content.match(/```html\s*([\s\S]*?)```/i);
+  const cssFence = content.match(/```css\s*([\s\S]*?)```/i);
+  const jsFence = content.match(/```(?:js|javascript)\s*([\s\S]*?)```/i);
+
+  let html = htmlFence?.[1]?.trim() || '';
+  const css = cssFence?.[1]?.trim() || '';
+  const js = jsFence?.[1]?.trim() || '';
+
+  const looksLikeRawHtml = /<!doctype\s+html|<html[\s>]/i.test(content);
+  if (!html && looksLikeRawHtml) {
+    html = content.trim();
+  }
+
+  if (!html && !css && !js) return null;
+
+  const hasDocumentShell = /<!doctype\s+html|<html[\s>]/i.test(html);
+  const bodyHtml = html && !hasDocumentShell
+    ? html
+    : html || '<div style="font-family: system-ui; padding: 24px; color: #e5e7eb;">Preview web siap.</div>';
+
+  if (hasDocumentShell) {
+    let finalHtml = html;
+    if (css) {
+      finalHtml = finalHtml.replace('</head>', `<style>${css}</style></head>`);
+    }
+    if (js) {
+      finalHtml = finalHtml.replace('</body>', `<script>${js}</script></body>`);
+    }
+    return finalHtml;
+  }
+
+  return `<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #0b1020; color: #e5e7eb; font-family: Inter, system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      ${css}
+    </style>
+  </head>
+  <body>
+    ${bodyHtml}
+    <script>
+      ${js}
+    </script>
+  </body>
+</html>`;
+}
+
 const AIResponse = ({ content, onSave, onContinue }) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const [copied, setCopied] = useState(false);
   const intervalRef = useRef(null);
+  const previewHtml = extractWebPreview(content);
 
   useEffect(() => {
     let i = 0;
@@ -92,6 +145,38 @@ const AIResponse = ({ content, onSave, onContinue }) => {
           }}></span>
         )}
       </div>
+
+      {!isTyping && previewHtml && (
+        <div style={{
+          marginTop: '1.5rem',
+          borderTop: '1px solid var(--border-color)',
+          paddingTop: '1.25rem',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.9rem' }}>
+            <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px rgba(16,185,129,0.7)' }} />
+            <span style={{ fontSize: '0.72rem', fontWeight: '900', color: '#10b981', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              Preview Web Otomatis
+            </span>
+          </div>
+          <div style={{
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            background: '#0b1020',
+            boxShadow: '0 12px 30px rgba(0,0,0,0.25)',
+          }}>
+            <iframe
+              title="Preview Web"
+              sandbox="allow-scripts"
+              srcDoc={previewHtml}
+              style={{ width: '100%', minHeight: '420px', border: 'none', background: '#fff' }}
+            />
+          </div>
+          <p style={{ margin: '0.75rem 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+            Preview ini muncul otomatis jika hasil AI berisi HTML, CSS, atau JavaScript web.
+          </p>
+        </div>
+      )}
 
       {/* Action Footer */}
       {!isTyping && (

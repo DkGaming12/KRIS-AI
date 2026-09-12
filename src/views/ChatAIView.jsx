@@ -96,14 +96,41 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
   };
 
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: 'calc(100vh - 120px)' }}>
-      <div style={{ marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <MessageSquare size={24} color="var(--brand-primary)" />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Chat AI (Beta)</h1>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 160px)', width: '100%' }}>
+      <div style={{
+        marginBottom: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '12px',
+        flexWrap: 'wrap'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'linear-gradient(135deg, #4f46e5, #0ea5e9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 30px rgba(79,70,229,0.35)' }}>
+            <MessageSquare size={22} color="white" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, lineHeight: '1.1' }}>Chat AI</h1>
+            <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Ngobrol, coding, debugging, dan diskusi kreatif</p>
+          </div>
+        </div>
+        <div style={{ padding: '8px 12px', borderRadius: '999px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.18)', color: '#a5b4fc', fontSize: '0.72rem', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          Beta
+        </div>
       </div>
 
-      <div className="premium-card-v2" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '1.5rem', overflow: 'hidden' }}>
-        <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingRight: '10px', marginBottom: '1.5rem' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', borderRadius: '24px', background: 'linear-gradient(180deg, rgba(9,12,24,0.96), rgba(15,18,33,0.96))', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 24px 70px rgba(0,0,0,0.35)' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', background: 'rgba(255,255,255,0.015)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+            <Sparkles size={14} color="#60a5fa" />
+            <span>Kris AI siap membantu dengan jawaban yang ringkas dan langsung pakai.</span>
+          </div>
+          <div style={{ padding: '6px 10px', borderRadius: '999px', background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.18)', color: '#25d366', fontSize: '0.72rem', fontWeight: '800' }}>
+            Token: {tokenBalance.toLocaleString('id-ID')}
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.15rem 1.15rem 1rem' }}>
           {messages.map((msg, idx) => (
             <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
               <div style={{
@@ -116,9 +143,9 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
               </div>
 
               <div style={{
-                maxWidth: '80%', padding: '12px 16px', borderRadius: '16px',
-                background: msg.role === 'user' ? 'rgba(99,102,241,0.15)' : 'rgba(0,0,0,0.2)',
-                border: msg.role === 'user' ? '1px solid rgba(99,102,241,0.3)' : '1px solid rgba(255,255,255,0.05)',
+                maxWidth: 'min(82%, 760px)', padding: '12px 15px', borderRadius: '16px',
+                background: msg.role === 'user' ? 'rgba(99,102,241,0.11)' : 'rgba(255,255,255,0.04)',
+                border: msg.role === 'user' ? '1px solid rgba(99,102,241,0.22)' : '1px solid rgba(255,255,255,0.06)',
                 color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: '1.6'
               }}>
                 {msg.role === 'user' ? (
@@ -146,56 +173,70 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
 
         {tokenBalance <= 0 ? (
           /* ── Token habis — tampilkan pesan beli token ── */
-          <div style={{
-            padding: '1.25rem', borderRadius: '14px', textAlign: 'center',
-            background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(219,39,119,0.05))',
-            border: '1px solid rgba(167,139,250,0.25)',
-          }}>
-            <Zap size={22} color="#c4b5fd" style={{ marginBottom: '8px' }} />
-            <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#c4b5fd', fontSize: '0.95rem' }}>
-              Token Kamu Habis!
-            </p>
-            <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5' }}>
-              Beli token untuk melanjutkan obrolan dengan Kris AI.
-            </p>
-            <a
-              href={WA_BUY_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                background: 'linear-gradient(135deg, #25d366, #128c7e)',
-                color: 'white', textDecoration: 'none', fontWeight: '700',
-                fontSize: '0.88rem', padding: '10px 20px', borderRadius: '10px',
-              }}
-            >
-              <ShoppingCart size={16} /> Beli Token via WhatsApp
-            </a>
+          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{
+              padding: '1rem 1rem 1.05rem', borderRadius: '16px', textAlign: 'center',
+              background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(219,39,119,0.05))',
+              border: '1px solid rgba(167,139,250,0.2)',
+            }}>
+              <Zap size={22} color="#c4b5fd" style={{ marginBottom: '8px' }} />
+              <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#c4b5fd', fontSize: '0.95rem' }}>
+                Token Kamu Habis!
+              </p>
+              <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5' }}>
+                Beli token untuk melanjutkan obrolan dengan Kris AI.
+              </p>
+              <a
+                href={WA_BUY_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: 'linear-gradient(135deg, #25d366, #128c7e)',
+                  color: 'white', textDecoration: 'none', fontWeight: '700',
+                  fontSize: '0.88rem', padding: '10px 20px', borderRadius: '10px',
+                }}
+              >
+                <ShoppingCart size={16} /> Beli Token via WhatsApp
+              </a>
+            </div>
           </div>
         ) : (
-          <div style={{ position: 'relative' }}>
-            <textarea
-              className="form-textarea"
-              placeholder="Tanyakan sesuatu pada Kris AI..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              style={{ paddingRight: '50px', minHeight: '60px', height: '60px', resize: 'none' }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              style={{
-                position: 'absolute', right: '8px', bottom: '10px',
-                background: 'linear-gradient(135deg, #a855f7, #6366f1)',
-                border: 'none', color: 'white', width: '36px', height: '36px',
-                borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: (!input.trim() || isLoading) ? 'not-allowed' : 'pointer',
-                opacity: (!input.trim() || isLoading) ? 0.5 : 1
-              }}
-            >
-              <Send size={16} />
-            </button>
+          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
+              <textarea
+                className="form-textarea"
+                placeholder="Tanyakan sesuatu pada Kris AI..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                style={{
+                  flex: 1,
+                  minHeight: '58px',
+                  height: '58px',
+                  resize: 'none',
+                  borderRadius: '14px',
+                  padding: '14px 16px',
+                  lineHeight: '1.5',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                style={{
+                  width: '56px',
+                  border: 'none', color: 'white', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #a855f7, #6366f1)',
+                  cursor: (!input.trim() || isLoading) ? 'not-allowed' : 'pointer',
+                  opacity: (!input.trim() || isLoading) ? 0.5 : 1,
+                  boxShadow: '0 10px 24px rgba(99,102,241,0.22)'
+                }}
+              >
+                <Send size={16} />
+              </button>
+            </div>
           </div>
         )}
       </div>
