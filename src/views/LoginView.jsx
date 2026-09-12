@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, Zap } from 'lucide-react';
+import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, Zap, User } from 'lucide-react';
 
 const WA_ADMIN_NUMBER = '6285700660475';
 const WA_SIGNUP_MSG   = encodeURIComponent(
@@ -7,7 +7,7 @@ const WA_SIGNUP_MSG   = encodeURIComponent(
 );
 const WA_LINK = `https://wa.me/${WA_ADMIN_NUMBER}?text=${WA_SIGNUP_MSG}`;
 
-export default function LoginView({ onLogin, authError, setAuthError }) {
+export default function LoginView({ onLogin, onGuestLogin, authError, setAuthError }) {
   const [email, setEmail]         = useState('');
   const [password, setPassword]   = useState('');
   const [showPass, setShowPass]   = useState(false);
@@ -121,7 +121,7 @@ export default function LoginView({ onLogin, authError, setAuthError }) {
             <Sparkles size={24} color="white" />
           </div>
           <h1 style={styles.title}>Kris AI</h1>
-          <p style={styles.subtitle}>Sastra Engine V6 — Masuk ke akunmu</p>
+          <p style={styles.subtitle}>Sastra Engine V8 — Masuk ke akunmu</p>
         </div>
 
         {/* Token Info Banner */}
@@ -130,6 +130,15 @@ export default function LoginView({ onLogin, authError, setAuthError }) {
           <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.7)' }}>
             User baru dapat <strong style={{ color: '#fbbf24' }}>10.000 token gratis</strong> setelah aktivasi
           </span>
+        </div>
+
+        <div style={styles.guestBanner}>
+          <div style={{ fontSize: '0.7rem', fontWeight: '900', color: '#60a5fa', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>
+            Coba Dulu
+          </div>
+          <p style={{ margin: 0, fontSize: '0.84rem', color: 'rgba(255,255,255,0.72)', lineHeight: '1.5' }}>
+            Masuk sebagai tamu untuk menjelajah fitur utama tanpa daftar. Kamu akan mendapat token demo dan bisa melihat alur kerja Kris AI dulu.
+          </p>
         </div>
 
         {/* Form */}
@@ -200,6 +209,22 @@ export default function LoginView({ onLogin, authError, setAuthError }) {
             ) : (
               <>Masuk <ArrowRight size={16} /></>
             )}
+          </button>
+
+          <button
+            id="btn-guest-login"
+            type="button"
+            onClick={() => onGuestLogin()}
+            style={{
+              ...styles.submitBtn,
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: '#cbd5e1',
+              marginTop: '4px',
+              boxShadow: 'none'
+            }}
+          >
+            <User size={16} /> Coba Mode Tamu
           </button>
         </form>
 
@@ -303,6 +328,13 @@ const styles = {
     borderRadius: '10px',
     padding: '10px 14px',
     marginBottom: '1.25rem',
+  },
+  guestBanner: {
+    background: 'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(14,165,233,0.06))',
+    border: '1px solid rgba(96,165,250,0.18)',
+    borderRadius: '14px',
+    padding: '14px 16px',
+    marginBottom: '1rem',
   },
   label: {
     display: 'block',

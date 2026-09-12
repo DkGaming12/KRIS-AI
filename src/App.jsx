@@ -8,6 +8,7 @@ import TokenBadge from './components/TokenBadge';
 import TokenEmptyModal, { WA_BUY_LINK } from './components/TokenEmptyModal';
 import BerandaView from './views/BerandaView';
 import BeliTokenView from './views/BeliTokenView';
+import MakalahView from './views/MakalahView';
 import ChatAIView from './views/ChatAIView';
 import GhostwriterView from './views/GhostwriterView';
 import RiwayatKaryaView from './views/RiwayatKaryaView';
@@ -232,7 +233,7 @@ const ToolsDrawer = ({ isOpen, onClose, onSelectTool }) => {
   );
 };
 
-const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsOpen, setIsToolsOpen, setActiveTool, theme, toggleTheme, currentView, setCurrentView, resetProgress, user, userProfile, tokenBalance, onSignOut }) => {
+const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsOpen, setIsToolsOpen, setActiveTool, theme, toggleTheme, currentView, setCurrentView, resetProgress, user, userProfile, tokenBalance, onSignOut, isGuestMode }) => {
   return (
     <div className="layout-wrapper" style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="noise-bg"></div>
@@ -240,10 +241,10 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
       
       <div className="marquee-banner">
         <div className="marquee-content">
-          <span style={{ paddingRight: '60px' }}>✦ PABRIKASI NOVEL LEBIH CEPAT DENGAN KRIS AI V6 — SASTRA ENGINE TERBAIK 2026</span>
-          <span style={{ paddingRight: '60px' }}>✦ PROMO TERBATAS: AKSES SULTAN AI DISKON 80% — HANYA 10 PENULIS PERTAMA!</span>
-          <span style={{ paddingRight: '60px' }}>✦ PABRIKASI NOVEL LEBIH CEPAT DENGAN KRIS AI V6 — SASTRA ENGINE TERBAIK 2026</span>
-          <span style={{ paddingRight: '60px' }}>✦ PROMO TERBATAS: AKSES SULTAN AI DISKON 80% — HANYA 10 PENULIS PERTAMA!</span>
+          <span style={{ paddingRight: '60px' }}>✦ PABRIKASI NOVEL & CODING LEBIH CEPAT DENGAN KRIS AI V8 — ASISTEN KREATIF ALL-IN-ONE 2026</span>
+          <span style={{ paddingRight: '60px' }}>✦ PROMO AKTIF: AKSES SULTAN AI DISKON 20% — KUOTA TERBATAS HARI INI!</span>
+          <span style={{ paddingRight: '60px' }}>✦ PABRIKASI NOVEL & CODING LEBIH CEPAT DENGAN KRIS AI V8 — ASISTEN KREATIF ALL-IN-ONE 2026</span>
+          <span style={{ paddingRight: '60px' }}>✦ PROMO AKTIF: AKSES SULTAN AI DISKON 20% — KUOTA TERBATAS HARI INI!</span>
         </div>
       </div>
 
@@ -284,7 +285,7 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
             </div>
             <div>
               <h1 className="glow-text tracking-tight" style={{ fontWeight: '900', fontSize: '1.4rem', color: 'var(--text-primary)', lineHeight: '1' }}>Kris Ai</h1>
-              <p style={{ fontSize: '0.55rem', color: '#0ea5e9', fontWeight: '900', letterSpacing: '2px', marginTop: '3px' }}>SASTRA ENGINE V6</p>
+              <p style={{ fontSize: '0.55rem', color: '#0ea5e9', fontWeight: '900', letterSpacing: '2px', marginTop: '3px' }}>SASTRA ENGINE V8</p>
             </div>
           </div>
 
@@ -322,6 +323,14 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
                     <ChevronRight size={14} color="#a5b4fc" />
                   </div>
                 )}
+              </button>
+              <button className={`nav-item ${currentView === 'makalah' ? 'active' : ''}`} onClick={() => setCurrentView('makalah')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: currentView === 'makalah' ? 'rgba(167, 139, 252, 0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                    <FileText size={16} color={currentView === 'makalah' ? '#a78bfa' : 'var(--text-secondary)'} />
+                  </div>
+                  <span>Buat Makalah</span>
+                </div>
               </button>
               <button className={`nav-item ${currentView === 'riwayat' ? 'active' : ''}`} onClick={() => setCurrentView('riwayat')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
@@ -401,6 +410,21 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
           </nav>
 
           <div style={{ marginTop: 'auto', padding: '1.25rem 1rem', borderTop: '1px solid var(--border-color)' }}>
+            {isGuestMode && (
+              <div style={{
+                marginBottom: '0.85rem',
+                padding: '0.8rem 0.9rem',
+                borderRadius: '14px',
+                background: 'linear-gradient(135deg, rgba(96,165,250,0.12), rgba(14,165,233,0.06))',
+                border: '1px solid rgba(96,165,250,0.2)',
+              }}>
+                <p style={{ margin: 0, fontSize: '0.68rem', fontWeight: '900', color: '#60a5fa', letterSpacing: '1px', textTransform: 'uppercase' }}>Mode Tamu Aktif</p>
+                <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+                  Data demo tetap ada selama tab ini dibuka. Cocok untuk mencoba fitur sebelum daftar.
+                </p>
+              </div>
+            )}
+
             {/* Token Badge — hanya tampilkan saldo, tanpa detail biaya per-aksi */}
             <TokenBadge tokenBalance={tokenBalance} onBuyClick={() => setCurrentView('belitoken')} />
 
@@ -413,7 +437,9 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
                   <p style={{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-primary)', lineHeight: '1.2', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {userProfile?.displayName || user?.displayName || (user?.email?.split('@')[0] || 'User')}
                   </p>
-                  <p style={{ fontSize: '0.6rem', color: 'var(--text-secondary)', marginTop: '1px', lineHeight: '1' }}>Member</p>
+                  <p style={{ fontSize: '0.6rem', color: isGuestMode ? '#60a5fa' : 'var(--text-secondary)', marginTop: '1px', lineHeight: '1', fontWeight: isGuestMode ? '800' : '400' }}>
+                    {isGuestMode ? 'Tamu' : 'Member'}
+                  </p>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '4px' }}>
@@ -449,16 +475,17 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
 
 export default function App() {
   // ─── Auth ────────────────────────────────────────────────────────────────
-  const { user, userProfile, tokenBalance, loading: authLoading, authError, setAuthError, signIn, signOut, spendTokens, isAuthenticated } = useAuth();
+  const { user, userProfile, tokenBalance, loading: authLoading, authError, setAuthError, signIn, signInAsGuest, signOut, spendTokens, isAuthenticated } = useAuth();
+  const isGuestMode = Boolean(user?.isGuest || userProfile?.isGuest);
   
   const [showTokenModal, setShowTokenModal] = useState(false);
 
   // Jika token habis, tampilkan modal beli token (hanya sekali saat saldo terdeteksi habis)
   useEffect(() => {
-    if (!authLoading && isAuthenticated && tokenBalance <= 0) {
+    if (!authLoading && isAuthenticated && !isGuestMode && tokenBalance <= 0) {
       setShowTokenModal(true);
     }
-  }, [tokenBalance, authLoading, isAuthenticated]);
+  }, [tokenBalance, authLoading, isAuthenticated, isGuestMode]);
 
   const [step, setStep] = useState(() => {
     const saved = localStorage.getItem('kris_ai_step');
@@ -476,8 +503,8 @@ export default function App() {
   const [activeProvider, setActiveProvider] = useState(null);
   const [customStyleInput, setCustomStyleInput] = useState('');
   
-  // Kris AI V6 Layout State
-  const [currentView, setCurrentView] = useState('generator');
+  // Kris AI V8 Layout State
+  const [currentView, setCurrentView] = useState('beranda');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState(null);
@@ -1297,6 +1324,7 @@ Konteks terakhir (lanjutkan dari sini):
     return (
       <LoginView
         onLogin={signIn}
+        onGuestLogin={signInAsGuest}
         authError={authError}
         setAuthError={setAuthError}
       />
@@ -1317,12 +1345,14 @@ Konteks terakhir (lanjutkan dari sini):
       userProfile={userProfile}
       tokenBalance={tokenBalance}
       onSignOut={signOut}
+        isGuestMode={isGuestMode}
     >
     <div className="app-container">
       {!activeTool ? (
         <>
           {currentView === 'beranda' && <BerandaView setCurrentView={setCurrentView} />}
           {currentView === 'belitoken' && <BeliTokenView />}
+          {currentView === 'makalah' && <MakalahView getClient={getClient} spendTokens={spendTokens} tokenBalance={tokenBalance} />}
           {currentView === 'chat' && <ChatAIView getClient={getClient} spendTokens={spendTokens} tokenBalance={tokenBalance} />}
           {currentView === 'ghostwriter' && <GhostwriterView getClient={getClient} spendTokens={spendTokens} />}
           {currentView === 'riwayat' && (

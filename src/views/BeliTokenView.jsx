@@ -8,6 +8,7 @@ const PACKAGES = [
     id: 'starter',
     name: 'Paket Starter',
     tokens: '100.000',
+    originalPrice: 'Rp 35.000',
     price: 'Rp 25.000',
     desc: 'Cocok untuk penulis pemula yang ingin mencoba fitur Kris AI.',
     color: '#38bdf8',
@@ -17,6 +18,7 @@ const PACKAGES = [
     id: 'pro',
     name: 'Paket Pro',
     tokens: '500.000',
+    originalPrice: 'Rp 129.000',
     price: 'Rp 100.000',
     desc: 'Pilihan terpopuler! Selesaikan 1-2 novel dengan nyaman.',
     color: '#a855f7',
@@ -27,6 +29,7 @@ const PACKAGES = [
     id: 'sultan',
     name: 'Paket Sultan',
     tokens: '1.000.000',
+    originalPrice: 'Rp 219.000',
     price: 'Rp 175.000',
     desc: 'Untuk penulis produktif. Harga lebih hemat, bebas khawatir habis token.',
     color: '#f59e0b',
@@ -59,6 +62,9 @@ export default function BeliTokenView() {
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
           Token digunakan untuk menghasilkan teks (1 kata = 1 token). Pilih paket yang sesuai dengan kebutuhan menulismu. Pembayaran aman dan token langsung ditambahkan ke akunmu.
         </p>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '1rem', padding: '8px 14px', borderRadius: '999px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.2)', color: '#25d366', fontSize: '0.82rem', fontWeight: '800' }}>
+          <Star size={14} /> Harga promo aktif terus
+        </div>
       </div>
 
       {/* Grid Paket */}
@@ -94,8 +100,13 @@ export default function BeliTokenView() {
               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Token</span>
             </div>
 
-            <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981', marginBottom: '15px' }}>
-              {pkg.price}
+            <div style={{ marginBottom: '15px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', textDecoration: 'line-through', marginBottom: '4px' }}>
+                Harga normal {pkg.originalPrice}
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981' }}>
+                Harga promo {pkg.price}
+              </div>
             </div>
 
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: '0 0 20px 0', flex: 1 }}>

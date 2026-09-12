@@ -15,11 +15,14 @@
     "kris:ghost": "node cli/kris.js ghostwrite"
   },
   "dependencies": {
+    "docx": "^9.7.1",
+    "file-saver": "^2.0.5",
     "firebase": "^12.19.0",
     "html2canvas": "^1.4.1",
     "lucide-react": "^1.30.0",
     "marked": "^18.0.9",
     "openai": "^7.4.0",
+    "pdfjs-dist": "^3.11.174",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0"

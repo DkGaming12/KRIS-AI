@@ -20,20 +20,33 @@ export default function TentangAppView() {
         </div>
         
         <h2 style={{ fontSize: '2rem', fontWeight: '900', margin: '0 0 8px 0', background: 'linear-gradient(135deg, #a5b4fc, #0ea5e9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          Sastra Engine V6
+          Kris AI V8
         </h2>
         <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', maxWidth: '500px', margin: '0 auto' }}>
-          Platform revolusioner bagi penulis untuk menciptakan mahakarya fiksi dengan bantuan Artificial Intelligence canggih.
+          Asisten kreatif mandiri untuk penulis, mahasiswa, dan developer yang ingin bergerak cepat tanpa kehilangan kualitas.
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '1.5rem' }}>
           <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', fontSize: '0.8rem', fontWeight: '600' }}>
-            Version 6.0.0
+            Version 8.0.0
           </span>
           <span style={{ padding: '4px 12px', borderRadius: '20px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', fontSize: '0.8rem', fontWeight: '600' }}>
             Stable Release
           </span>
         </div>
+      </div>
+
+      <div className="premium-card-v2" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <PenTool size={20} color="#f59e0b" />
+          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Biodata Pembuat</h3>
+        </div>
+        <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '700' }}>
+          Didi Purnomo
+        </p>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+          Mahasiswa Informatika UIN Gusdur Pekalongan. Kris AI dibangun sebagai asisten mandiri untuk mendukung karya sastra, coding, dan produktivitas kreatif sehari-hari.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '1.5rem' }}>
@@ -43,8 +56,8 @@ export default function TentangAppView() {
             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Teknologi Kris AI</h3>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-            Ditenagai oleh arsitektur LLM modern (OpenAI GPT Models) yang di-prompt khusus menggunakan prompt *masterclass sastra*. 
-            Sastra Engine tidak hanya menyusun kata, tapi juga merangkai emosi dan pembangunan dunia yang solid.
+            Dirancang sebagai mesin AI mandiri yang fokus pada hasil kerja nyata: penulisan, coding, ideasi, dan eksekusi cepat. 
+            Kris AI dibentuk untuk tetap terasa sebagai produk utuh yang punya karakter sendiri.
           </p>
         </div>
 
@@ -54,16 +67,16 @@ export default function TentangAppView() {
             <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Fokus Kami</h3>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
-            Sastra Engine V6 didesain agar penulis tidak tergantikan oleh AI, melainkan **terakselerasi** oleh AI. 
-            AI berfokus pada draft kasar, outline, dan ideasi, sementara sentuhan emosi akhir tetap di tangan manusia.
+            Kris AI V8 didesain agar penulis dan developer tidak tergantikan oleh AI, melainkan **terakselerasi** oleh AI. 
+            AI berfokus pada draft kasar, outline, ideasi, dan bantuan coding, sementara sentuhan akhir tetap di tangan manusia.
           </p>
         </div>
       </div>
       
       <div style={{ textAlign: 'center', marginTop: '3rem', paddingBottom: '2rem' }}>
         <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          Dibuat dengan <Star size={12} color="#fbbf24" style={{ display: 'inline', margin: '0 2px' }} /> untuk para penulis di seluruh dunia.<br/>
-          &copy; {new Date().getFullYear()} Kris AI - Sastra Engine.
+          Dibuat dengan <Star size={12} color="#fbbf24" style={{ display: 'inline', margin: '0 2px' }} /> untuk penulis, mahasiswa, dan developer di seluruh dunia.<br/>
+          &copy; {new Date().getFullYear()} Kris AI V8.
         </p>
       </div>
     </div>

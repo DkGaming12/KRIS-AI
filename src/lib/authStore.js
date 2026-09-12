@@ -33,6 +33,43 @@ import app, { auth, db } from './firebase';
 
 // ─── Konstanta ───────────────────────────────────────────────────────────────
 export const INITIAL_TOKEN_GRANT = 10_000;
+const GUEST_SESSION_KEY = 'kris_ai_guest_session';
+
+function readGuestSession() {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const rawSession = window.sessionStorage.getItem(GUEST_SESSION_KEY);
+    if (!rawSession) return null;
+
+    const parsed = JSON.parse(rawSession);
+    if (!parsed?.user) return null;
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeGuestSession(payload) {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.sessionStorage.setItem(GUEST_SESSION_KEY, JSON.stringify(payload));
+  } catch {
+    // Abaikan kegagalan storage agar mode tamu tetap bisa dipakai.
+  }
+}
+
+function clearGuestSession() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.sessionStorage.removeItem(GUEST_SESSION_KEY);
+  } catch {
+    // Abaikan kegagalan storage.
+  }
+}
 
 // ─── Firestore helpers ───────────────────────────────────────────────────────
 
@@ -151,11 +188,12 @@ export async function adminCreateUser(email, password, bonusTokens) {
  *         signIn(email, pass), signOut(), refreshToken()
  */
 export function useAuth() {
-  const [user, setUser]                 = useState(null);
-  const [userProfile, setUserProfile]   = useState(null);
-  const [tokenBalance, setTokenBalance] = useState(0);
-  const [loading, setLoading]           = useState(true);
-  const [authError, setAuthError]       = useState('');
+  const [firebaseUser, setFirebaseUser] = useState(null);
+  const [guestUser, setGuestUser] = useState(() => readGuestSession()?.user ?? null);
+  const [userProfile, setUserProfile] = useState(() => readGuestSession()?.profile ?? null);
+  const [tokenBalance, setTokenBalance] = useState(() => readGuestSession()?.tokenBalance ?? 0);
+  const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
 
   // Dengarkan perubahan auth state
   useEffect(() => {
@@ -166,32 +204,38 @@ export function useAuth() {
       return;
     }
 
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
-        if (firebaseUser.email === 'didikpurnomoipung21@gmail.com' || firebaseUser.email === 'didikpurnomoipu@gmail.com') {
+    const unsub = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        setGuestUser(null);
+        clearGuestSession();
+        if (fbUser.email === 'didikpurnomoipung21@gmail.com' || fbUser.email === 'didikpurnomoipu@gmail.com') {
           setTokenBalance(999999999);
         }
 
         try {
-          const profile = await ensureUserDoc(firebaseUser.uid, firebaseUser.email);
+          const profile = await ensureUserDoc(fbUser.uid, fbUser.email);
           setUserProfile(profile);
-          if (firebaseUser.email !== 'didikpurnomoipung21@gmail.com' && firebaseUser.email !== 'didikpurnomoipu@gmail.com') {
+          if (fbUser.email !== 'didikpurnomoipung21@gmail.com' && fbUser.email !== 'didikpurnomoipu@gmail.com') {
             setTokenBalance(profile.tokenBalance ?? 0);
           }
         } catch (e) {
           console.error('[useAuth] Gagal load profil:', e);
         }
       } else {
-        setUser(null);
-        setUserProfile(null);
-        setTokenBalance(0);
+        setFirebaseUser(null);
+        // Jika tidak ada user firebase, dan tidak ada tamu, baru reset state
+        // (Guest state akan dikelola terpisah tanpa menabrak Firebase Auth)
+        if (!guestUser) {
+          setUserProfile(null);
+          setTokenBalance(0);
+        }
       }
       setLoading(false);
     });
 
     return unsub;
-  }, []);
+  }, [guestUser]);
 
   /** Login dengan email + password */
   const signIn = useCallback(async (email, password) => {
@@ -208,45 +252,87 @@ export function useAuth() {
     }
   }, []);
 
+  /** Login sebagai Tamu (Ephemeral) */
+  const signInAsGuest = useCallback(() => {
+    const dummyGuest = {
+      uid: 'guest-' + Date.now(),
+      email: 'tamu@kris.ai',
+      displayName: 'Tamu Mode',
+      isGuest: true
+    };
+    setGuestUser(dummyGuest);
+    setUserProfile({
+      isGuest: true,
+      displayName: 'Tamu Mode',
+      email: dummyGuest.email,
+    });
+    setTokenBalance(100); // Saldo token demo untuk mode tamu
+    writeGuestSession({
+      user: dummyGuest,
+      profile: {
+        isGuest: true,
+        displayName: 'Tamu Mode',
+        email: dummyGuest.email,
+      },
+      tokenBalance: 100,
+    });
+    setAuthError('');
+  }, []);
+
   /** Logout */
   const signOut = useCallback(async () => {
-    await firebaseSignOut(auth);
-  }, []);
+    if (guestUser) {
+      setGuestUser(null);
+      setTokenBalance(0);
+      setUserProfile(null);
+      clearGuestSession();
+    } else {
+      await firebaseSignOut(auth);
+    }
+  }, [guestUser]);
+
+  const activeUser = firebaseUser || guestUser;
 
   /** Refresh saldo token dari Firestore */
   const refreshToken = useCallback(async () => {
-    if (!user) return;
-    if (user.email === 'didikpurnomoipung21@gmail.com' || user.email === 'didikpurnomoipu@gmail.com') {
+    if (!activeUser || activeUser.isGuest) return;
+    if (activeUser.email === 'didikpurnomoipung21@gmail.com' || activeUser.email === 'didikpurnomoipu@gmail.com') {
       setTokenBalance(999999999);
       return;
     }
-    const bal = await fetchTokenBalance(user.uid);
+    const bal = await fetchTokenBalance(activeUser.uid);
     setTokenBalance(bal);
-  }, [user]);
+  }, [activeUser]);
 
-  /**
-   * Panggil ini setelah AI selesai generate.
-   * Kurangi token berdasarkan output, lalu update state lokal.
-   */
   const spendTokens = useCallback(async (aiOutput) => {
-    if (!user || !aiOutput) return;
-    if (user.email === 'didikpurnomoipung21@gmail.com' || user.email === 'didikpurnomoipu@gmail.com') return; // Unlimited for admin
-    const newBalance = await spendTokensForOutput(user.uid, aiOutput);
+    if (!activeUser || !aiOutput) return;
+    
+    const wordCount = aiOutput.trim().split(/\\s+/).filter((w) => w.length > 0).length;
+    const tokensToSpend = Math.max(1, wordCount);
+
+    if (activeUser.isGuest) {
+      setTokenBalance(prev => Math.max(0, prev - tokensToSpend));
+      return;
+    }
+
+    if (activeUser.email === 'didikpurnomoipung21@gmail.com' || activeUser.email === 'didikpurnomoipu@gmail.com') return; // Unlimited for admin
+    const newBalance = await spendTokensForOutput(activeUser.uid, aiOutput);
     setTokenBalance(newBalance);
-  }, [user]);
+  }, [activeUser]);
 
   return {
-    user,
+    user: activeUser,
     userProfile,
     tokenBalance,
     loading,
     authError,
     setAuthError,
     signIn,
+    signInAsGuest,
     signOut,
     refreshToken,
     spendTokens,
-    isAuthenticated: !!user,
+    isAuthenticated: !!activeUser,
     hasTokens: tokenBalance > 0,
   };
 }

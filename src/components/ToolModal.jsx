@@ -104,8 +104,8 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
       setOutput(generatedText);
       setShowForm(false);
     } catch (err) {
-      console.error("OpenAI Generation Error:", err);
-      setOutput(`[KONEKSI GAGAL] \n\nMesin Kris Ai (OpenAI) gagal memproses permintaan Anda.\n\nAlasan:\n${err.message}\n\nSolusi: Pastikan Anda telah mengisi VITE_OPENAI_API_KEY di file .env.`);
+      console.error("Kris AI Generation Error:", err);
+      setOutput(`[KONEKSI GAGAL] \n\nMesin Kris AI gagal memproses permintaan Anda.\n\nAlasan:\n${err.message}\n\nSolusi: Pastikan koneksi AI sudah dikonfigurasi dengan benar.`);
       setShowForm(false);
     } finally {
       setIsGenerating(false);

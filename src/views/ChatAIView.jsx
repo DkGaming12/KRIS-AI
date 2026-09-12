@@ -38,7 +38,7 @@ const RenderMessageContent = ({ content }) => {
 
 export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Halo! Saya Kris AI, Sastra Engine V6. Apa yang ingin Anda diskusikan tentang penulisan novel hari ini?' }
+    { role: 'assistant', content: 'Halo! Saya Kris AI, Sastra Engine V8. Saya siap bantu penulisan novel, coding, debugging, dan ide kreatif lainnya. Apa yang ingin Anda kerjakan hari ini?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
