@@ -1,6 +1,6 @@
 /**
  * aiClient.js — Multi-provider AI client dengan auto-fallback
- * Urutan fallback: OmniRoute (lokal) → Gemini → Groq → OpenAI → Error
+ * Urutan fallback: AgentRouter → Gemini → Groq → OpenAI → Error
  */
 
 import OpenAI from 'openai';
@@ -9,24 +9,32 @@ import OpenAI from 'openai';
 // Provider configurations
 // ─────────────────────────────────────────────
 
-const OMNI_BASE_URL = import.meta.env.VITE_OPENAI_BASE_URL || 'http://localhost:20127/v1';
-const OMNI_API_KEY  = import.meta.env.VITE_OPENAI_API_KEY  || 'dummy';
+const AGENTROUTER_BASE_URL =
+  import.meta.env.VITE_AGENTROUTER_BASE_URL ||
+  import.meta.env.VITE_OPENAI_BASE_URL ||
+  'https://agentrouter.org/v1';
+
+const AGENTROUTER_API_KEY =
+  import.meta.env.VITE_AGENTROUTER_API_KEY ||
+  import.meta.env.VITE_OPENAI_API_KEY ||
+  'dummy';
 
 const PROVIDERS = [
   {
     id: 'omni',
-    name: 'OpenRouter',
+    name: 'AgentRouter',
     // baseURL & apiKey di-resolve secara dinamis — lihat buildClient()
-    baseURL: OMNI_BASE_URL,
-    envKey: 'VITE_OPENAI_API_KEY',       // env key yang dibaca
-    localStorageKey: 'kris_ai_api_key',  // localStorage key (lama / compat)
-    // OmniRoute punya multi-provider sendiri, jadi "auto" valid di sini
+    baseURL: AGENTROUTER_BASE_URL,
+    envKey: 'VITE_AGENTROUTER_API_KEY',   // env key yang dibaca
+    legacyEnvKey: 'VITE_OPENAI_API_KEY',  // kompatibilitas lama
+    localStorageKey: 'kris_ai_api_key',   // localStorage key (lama / compat)
+    // AgentRouter butuh model yang spesifik, jadi jangan pakai openrouter/auto.
     models: {
-      default: 'openrouter/auto',
-      powerful: 'openrouter/auto',
-      fast: 'openrouter/auto',
+      default: 'gpt-5.5',
+      powerful: 'gpt-5.6',
+      fast: 'gpt-5.5',
     },
-    // OmniRoute dianggap "tersedia" kalau endpoint-nya reachable
+    // AgentRouter dianggap "tersedia" kalau endpoint-nya reachable
     // Kita cek ketersediaannya via flag alwaysAvailable — tapi tetap fallback jika 402/429
     alwaysAvailable: true,
     errorCodes: [429, 402, 403, 401],
@@ -81,11 +89,12 @@ const PROVIDERS = [
 
 /** Ambil API key dari localStorage atau env */
 function getApiKey(provider) {
-  // OmniRoute: pakai env key langsung (atau 'dummy' jika tidak ada)
+  // AgentRouter: pakai env key langsung (atau 'dummy' jika tidak ada)
   if (provider.id === 'omni') {
     return localStorage.getItem(provider.localStorageKey)
       || import.meta.env[provider.envKey]
-      || OMNI_API_KEY;
+      || import.meta.env[provider.legacyEnvKey]
+      || AGENTROUTER_API_KEY;
   }
   return (
     localStorage.getItem(provider.localStorageKey) ||
@@ -145,8 +154,12 @@ function isNetworkError(error) {
 /** Resolve model name */
 function resolveModel(provider, requestedModel) {
   if (provider.id === 'omni') {
-    // OmniRoute support 'auto' natively
-    return requestedModel || 'auto';
+    // AgentRouter butuh model valid; fallback ke default jika auto/kosong.
+    if (!requestedModel || requestedModel === 'auto' || requestedModel === 'openrouter/auto') {
+      return provider.models.default;
+    }
+    const isKnown = Object.values(provider.models).includes(requestedModel);
+    return isKnown ? requestedModel : provider.models.default;
   }
   if (!requestedModel || requestedModel === 'auto') {
     return provider.models.default;
