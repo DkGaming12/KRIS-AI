@@ -33,6 +33,7 @@ import app, { auth, db } from './firebase';
 
 // ─── Konstanta ───────────────────────────────────────────────────────────────
 export const INITIAL_TOKEN_GRANT = 10_000;
+export const GUEST_TOKEN_BALANCE = 100;
 const GUEST_SESSION_KEY = 'kris_ai_guest_session';
 
 function readGuestSession() {
@@ -44,6 +45,13 @@ function readGuestSession() {
 
     const parsed = JSON.parse(rawSession);
     if (!parsed?.user) return null;
+
+    if (parsed.user.isGuest) {
+      return {
+        ...parsed,
+        tokenBalance: GUEST_TOKEN_BALANCE,
+      };
+    }
 
     return parsed;
   } catch {
@@ -266,7 +274,7 @@ export function useAuth() {
       displayName: 'Tamu Mode',
       email: dummyGuest.email,
     });
-    setTokenBalance(100); // Saldo token demo untuk mode tamu
+    setTokenBalance(GUEST_TOKEN_BALANCE); // Saldo token demo untuk mode tamu
     writeGuestSession({
       user: dummyGuest,
       profile: {
@@ -274,7 +282,7 @@ export function useAuth() {
         displayName: 'Tamu Mode',
         email: dummyGuest.email,
       },
-      tokenBalance: 100,
+      tokenBalance: GUEST_TOKEN_BALANCE,
     });
     setAuthError('');
   }, []);
