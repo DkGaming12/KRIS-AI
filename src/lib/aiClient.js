@@ -19,6 +19,87 @@ const AGENTROUTER_API_KEY =
   import.meta.env.VITE_OPENAI_API_KEY ||
   'dummy';
 
+function createSseAsyncIterable(body) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+
+  return {
+    async *[Symbol.asyncIterator]() {
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        let separatorIndex = buffer.indexOf('\n\n');
+        while (separatorIndex !== -1) {
+          const rawEvent = buffer.slice(0, separatorIndex).trim();
+          buffer = buffer.slice(separatorIndex + 2);
+
+          const dataLines = rawEvent
+            .split('\n')
+            .filter((line) => line.startsWith('data:'))
+            .map((line) => line.slice(5).trim())
+            .filter(Boolean);
+
+          for (const dataLine of dataLines) {
+            if (dataLine === '[DONE]') {
+              return;
+            }
+
+            try {
+              yield JSON.parse(dataLine);
+            } catch {
+              // Abaikan payload non-JSON agar stream tetap jalan.
+            }
+          }
+
+          separatorIndex = buffer.indexOf('\n\n');
+        }
+      }
+
+      const trailing = buffer.trim();
+      if (trailing.startsWith('data:')) {
+        const payload = trailing.slice(5).trim();
+        if (payload && payload !== '[DONE]') {
+          try {
+            yield JSON.parse(payload);
+          } catch {
+            // Abaikan payload akhir yang tidak valid.
+          }
+        }
+      }
+    },
+  };
+}
+
+async function createAgentRouterChatCompletion(params) {
+  const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(params),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || `AgentRouter proxy gagal (${response.status})`);
+  }
+
+  if (params.stream) {
+    if (!response.body) {
+      throw new Error('Stream respons AgentRouter tidak tersedia.');
+    }
+
+    return createSseAsyncIterable(response.body);
+  }
+
+  return response.json();
+}
+
 const PROVIDERS = [
   {
     id: 'omni',
@@ -113,6 +194,16 @@ function getAvailableProviders() {
 
 /** Buat OpenAI-compatible client untuk provider tertentu */
 function buildClient(provider) {
+  if (provider.id === 'omni') {
+    return {
+      chat: {
+        completions: {
+          create: (params) => createAgentRouterChatCompletion(params),
+        },
+      },
+    };
+  }
+
   return new OpenAI({
     apiKey: getApiKey(provider),
     baseURL: provider.baseURL,
