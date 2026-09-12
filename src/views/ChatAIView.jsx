@@ -119,13 +119,13 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', borderRadius: '24px', background: 'linear-gradient(180deg, rgba(9,12,24,0.96), rgba(15,18,33,0.96))', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 24px 70px rgba(0,0,0,0.35)' }}>
-        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', background: 'rgba(255,255,255,0.015)' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', borderRadius: '24px', background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow)' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', background: 'var(--glass-bg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
             <Sparkles size={14} color="#60a5fa" />
             <span>Kris AI siap membantu dengan jawaban yang ringkas dan langsung pakai.</span>
           </div>
-          <div style={{ padding: '6px 10px', borderRadius: '999px', background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.18)', color: '#25d366', fontSize: '0.72rem', fontWeight: '800' }}>
+          <div style={{ padding: '6px 10px', borderRadius: '999px', background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.18)', color: '#16a34a', fontSize: '0.72rem', fontWeight: '800' }}>
             Token: {tokenBalance.toLocaleString('id-ID')}
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
               <div style={{
                 width: '36px', height: '36px', borderRadius: '12px', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: msg.role === 'assistant' ? 'linear-gradient(135deg, #4f46e5, #0ea5e9)' : 'rgba(255,255,255,0.1)',
+                background: msg.role === 'assistant' ? 'linear-gradient(135deg, #4f46e5, #0ea5e9)' : 'var(--glass-bg)',
                 color: msg.role === 'assistant' ? 'white' : 'var(--text-secondary)'
               }}>
                 {msg.role === 'assistant' ? <Sparkles size={18} /> : <User size={18} />}
@@ -144,8 +144,8 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
 
               <div style={{
                 maxWidth: 'min(82%, 760px)', padding: '12px 15px', borderRadius: '16px',
-                background: msg.role === 'user' ? 'rgba(99,102,241,0.11)' : 'rgba(255,255,255,0.04)',
-                border: msg.role === 'user' ? '1px solid rgba(99,102,241,0.22)' : '1px solid rgba(255,255,255,0.06)',
+                background: msg.role === 'user' ? 'rgba(99,102,241,0.10)' : 'var(--glass-bg)',
+                border: msg.role === 'user' ? '1px solid rgba(99,102,241,0.20)' : '1px solid var(--border-color)',
                 color: 'var(--text-primary)', fontSize: '0.95rem', lineHeight: '1.6'
               }}>
                 {msg.role === 'user' ? (
@@ -176,8 +176,8 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
           <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{
               padding: '1rem 1rem 1.05rem', borderRadius: '16px', textAlign: 'center',
-              background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(219,39,119,0.05))',
-              border: '1px solid rgba(167,139,250,0.2)',
+              background: 'var(--glass-bg)',
+              border: '1px solid var(--border-color)',
             }}>
               <Zap size={22} color="#c4b5fd" style={{ marginBottom: '8px' }} />
               <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#c4b5fd', fontSize: '0.95rem' }}>
@@ -202,7 +202,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
             </div>
           </div>
         ) : (
-          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}>
+          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid var(--border-color)', background: 'var(--glass-bg)' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
               <textarea
                 className="form-textarea"
@@ -218,8 +218,8 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
                   borderRadius: '14px',
                   padding: '14px 16px',
                   lineHeight: '1.5',
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border-color)',
                 }}
               />
               <button

@@ -6,12 +6,21 @@
   --brand-accent: #0ea5e9;
   --bg-dark: #050508;
   --bg-main: #050508;
+  --bg-primary: #09090f;
+  --bg-secondary: #0d0d14;
+  --surface-color: rgba(12, 12, 20, 0.92);
   --bg-card: rgba(12, 12, 20, 0.85);
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-h: #f8fafc;
   --border-color: rgba(255, 255, 255, 0.07);
+  --border: rgba(255, 255, 255, 0.07);
   --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.07);
   --glass-blur: blur(24px);
+  --shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+  --social-bg: rgba(255, 255, 255, 0.05);
   --neon-blue: #60a5fa;
   --neon-purple: #a78bfa;
   --fire-gradient: linear-gradient(90deg, #ff4d4d 0%, #f97316 100%);
@@ -29,13 +38,23 @@
 [data-theme='light'] {
   --bg-dark: #f1f5f9;
   --bg-main: #f1f5f9;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --surface-color: rgba(255, 255, 255, 0.94);
   --bg-card: rgba(255, 255, 255, 0.95);
   --text-primary: #0f172a;
   --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-h: #0f172a;
   --border-color: rgba(0, 0, 0, 0.07);
+  --border: rgba(0, 0, 0, 0.07);
   --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(148, 163, 184, 0.18);
+  --shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+  --social-bg: rgba(15, 23, 42, 0.04);
   --brand-primary: #4f46e5;
   --brand-secondary: #4338ca;
+  color-scheme: light;
 }
 
 * {
@@ -51,6 +70,16 @@ body {
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+}
+
+html {
+  background: var(--bg-main);
+  color-scheme: dark;
+}
+
+[data-theme='light'] html,
+[data-theme='light'] body {
+  background: var(--bg-main);
 }
 
 /* ===================== BASE LAYOUT ===================== */
