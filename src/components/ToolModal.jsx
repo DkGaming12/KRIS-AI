@@ -121,13 +121,13 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
   };
 
   return (
-    <div className="tool-inline-container animate-fade" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <div className="tool-inline-content glass" style={{
-        width: '100%', background: 'var(--bg-dark)',
-        borderRadius: '2rem', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
+    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <div style={{
+        width: '100%', background: 'var(--bg-card)',
+        borderRadius: '2rem', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden'
       }}>
         {/* Header */}
-        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{ padding: '10px', background: 'rgba(99, 102, 241, 0.14)', color: '#6366f1', borderRadius: '14px' }}>
               <tool.icon size={22} />
@@ -152,9 +152,9 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
         </div>
 
         {/* Modal Body */}
-        <div className="modal-body" style={{ padding: '2.5rem', flex: 1, overflowY: 'auto' }}>
+        <div style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
           {showForm ? (
-            <div className="form-layout animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
                 {toolDef.fields.map(field => {
                   // Check conditions
@@ -194,7 +194,7 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
                               style={{
                                 flex: 1, padding: '0.75rem', borderRadius: '1rem', border: '1px solid',
                                 borderColor: formData[field.id] === opt ? '#6366f1' : 'var(--border-color)',
-                                background: formData[field.id] === opt ? 'rgba(99, 102, 241, 0.1)' : 'rgba(255,255,255,0.03)',
+                                background: formData[field.id] === opt ? 'rgba(99, 102, 241, 0.1)' : 'var(--glass-bg)',
                                 color: formData[field.id] === opt ? '#6366f1' : 'var(--text-secondary)',
                                 fontSize: '0.85rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s'
                               }}
@@ -208,7 +208,7 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
                       {errors[field.id] && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.4rem', fontWeight: 'bold' }}>{errors[field.id]}</p>}
 
                       {field.type === 'tabs' && (
-                        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', background: 'var(--glass-bg)', padding: '4px', borderRadius: '1rem', border: '1px solid var(--border-color)' }}>
                           {field.options.map(opt => (
                             <button
                               key={opt}
@@ -231,9 +231,9 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
               </div>
 
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.05)', padding: '0.6rem 1rem', borderRadius: '0.8rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass-bg)', padding: '0.6rem 1rem', borderRadius: '0.8rem', border: '1px solid var(--border-color)' }}>
                   <Coins size={16} color="#fbbf24" />
-                  <span style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: 'bold' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
                     Estimasi: <span style={{ color: '#fbbf24' }}>Dinamic (Maks ~10) Token</span>
                   </span>
                 </div>
@@ -249,8 +249,8 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
               </div>
             </div>
           ) : (
-            <div className="result-view animate-fade">
-              <AIResponse 
+            <div className="animate-fade">
+              <AIResponse
                 content={output} 
                 onSave={() => onSave(output, tool.name)}
                 onContinue={() => { /* Handoff logic */ }} 

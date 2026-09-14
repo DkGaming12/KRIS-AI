@@ -255,27 +255,34 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
   // ─── FORM ───────────────────────────────────────
   if (step === 'form') return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
-      <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <BookOpen size={24} color="#a78bfa" />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Buat Makalah AI</h1>
-        <span style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: '0.7rem', fontWeight: '700', padding: '3px 8px', borderRadius: '20px', border: '1px solid rgba(167,139,250,0.3)' }}>BETA</span>
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7)' }}>
+            <BookOpen size={22} />
+          </div>
+          <div>
+            <h1 className="view-title">Buat Makalah AI</h1>
+            <p className="view-subtitle">Makalah ilmiah dengan sitasi APA, siap export ke Word</p>
+          </div>
+        </div>
+        <span className="chip brand" style={{ textTransform: 'uppercase' }}>Beta</span>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: '1rem', marginBottom: '1rem' }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '600' }}>📌 Judul Makalah <span style={{ color: '#f43f5e' }}>*</span></label>
+          <label className="field-label">📌 Judul Makalah <span style={{ color: '#f43f5e' }}>*</span></label>
           <input type="text" className="form-input" placeholder='Contoh: "Dampak Perubahan Iklim terhadap Ketahanan Pangan di Indonesia"' value={judul} onChange={(e) => setJudul(e.target.value)} style={{ width: '100%' }} />
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '600' }}>👤 Nama Penulis</label>
+          <label className="field-label">👤 Nama Penulis</label>
           <input type="text" className="form-input" placeholder="Nama lengkap Anda" value={author} onChange={(e) => setAuthor(e.target.value)} style={{ width: '100%' }} />
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '600' }}>🏫 Instansi / Universitas</label>
+          <label className="field-label">🏫 Instansi / Universitas</label>
           <input type="text" className="form-input" placeholder="Nama sekolah/universitas" value={institution} onChange={(e) => setInstitution(e.target.value)} style={{ width: '100%' }} />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px', fontWeight: '600' }}>📚 Mata Pelajaran / Mata Kuliah</label>
+          <label className="field-label">📚 Mata Pelajaran / Mata Kuliah</label>
           <input type="text" className="form-input" placeholder='Contoh: "Ilmu Lingkungan", "Ekonomi Pertanian"' value={subject} onChange={(e) => setSubject(e.target.value)} style={{ width: '100%' }} />
         </div>
       </div>
@@ -314,7 +321,7 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
         </div>
       )}
 
-      <button onClick={handleGenerate} disabled={!judul.trim()} style={{ padding: '16px', borderRadius: '14px', background: judul.trim() ? 'linear-gradient(135deg, #7c3aed, #a855f7)' : 'rgba(255,255,255,0.05)', border: 'none', color: 'white', fontWeight: '800', fontSize: '1rem', cursor: judul.trim() ? 'pointer' : 'not-allowed', opacity: judul.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: judul.trim() ? '0 8px 30px rgba(124,58,237,0.4)' : 'none', transition: 'all 0.2s' }}>
+      <button onClick={handleGenerate} disabled={!judul.trim()} style={{ padding: '16px', borderRadius: '14px', background: judul.trim() ? 'linear-gradient(135deg, #7c3aed, #a855f7)' : 'var(--glass-bg)', border: 'none', color: 'white', fontWeight: '800', fontSize: '1rem', cursor: judul.trim() ? 'pointer' : 'not-allowed', opacity: judul.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: judul.trim() ? '0 8px 30px rgba(124,58,237,0.4)' : 'none', transition: 'all 0.2s' }}>
         <Zap size={20} />Buat Makalah dengan AI
       </button>
     </div>
@@ -342,7 +349,7 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
           <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800' }}>Makalah Selesai! 🎉</h2>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button onClick={handleReset} style={{ padding: '10px 18px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button onClick={handleReset} style={{ padding: '10px 18px', borderRadius: '10px', background: 'var(--glass-bg)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <X size={15} /> Buat Baru
           </button>
           <button onClick={handleExport} disabled={isExporting} style={{ padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #1d6f42, #2e9c5f)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 4px 15px rgba(29,111,66,0.4)', opacity: isExporting ? 0.6 : 1 }}>

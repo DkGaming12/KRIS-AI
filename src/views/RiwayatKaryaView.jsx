@@ -49,9 +49,16 @@ export default function RiwayatKaryaView({ onLoadNovel, onSequelNovel, onExportW
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <History size={24} color="#fb7185" />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Riwayat Karya & Unduh</h1>
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon" style={{ background: 'linear-gradient(135deg, #fb7185, #e11d48)' }}>
+            <History size={22} />
+          </div>
+          <div>
+            <h1 className="view-title">Riwayat Karya & Unduh</h1>
+            <p className="view-subtitle">Baca, lanjutkan, dan unduh karya yang pernah dibuat</p>
+          </div>
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', paddingRight: '10px' }}>
@@ -197,8 +204,10 @@ export default function RiwayatKaryaView({ onLoadNovel, onSequelNovel, onExportW
                 </button>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '40px', backgroundColor: 'var(--bg-secondary)', fontSize: '1.1rem', lineHeight: '1.8', color: 'var(--text-primary)' }}
-                   dangerouslySetInnerHTML={{ __html: marked.parse(readerNovel.chapters[readerChapterIndex] || '*Episode ini masih kosong.*') }}
+              <div
+                className="markdown-content"
+                style={{ flex: 1, overflowY: 'auto', padding: '2.5rem', backgroundColor: 'var(--bg-secondary)', fontSize: '1.05rem' }}
+                dangerouslySetInnerHTML={{ __html: marked.parse(readerNovel.chapters[readerChapterIndex] || '*Episode ini masih kosong.*') }}
               />
 
               <div style={{ padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--bg-primary)' }}>

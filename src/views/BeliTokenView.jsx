@@ -46,9 +46,16 @@ export default function BeliTokenView() {
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
       {/* Header */}
-      <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Zap size={24} color="#f59e0b" />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Beli Token AI</h1>
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon" style={{ background: 'linear-gradient(135deg, #f59e0b, #fbbf24)' }}>
+            <Zap size={22} />
+          </div>
+          <div>
+            <h1 className="view-title">Beli Token AI</h1>
+            <p className="view-subtitle">Isi ulang token untuk semua fitur Kris AI</p>
+          </div>
+        </div>
       </div>
 
       <div style={{
@@ -101,7 +108,7 @@ export default function BeliTokenView() {
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.45)', textDecoration: 'line-through', marginBottom: '4px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textDecoration: 'line-through', marginBottom: '4px' }}>
                 Harga normal {pkg.originalPrice}
               </div>
               <div style={{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981' }}>

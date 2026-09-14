@@ -54,14 +54,14 @@ export default function LoginView({ onLogin, onGuestLogin, authError, setAuthErr
             ].map((s) => (
               <div key={s.num} style={styles.stepRow}>
                 <div style={styles.stepNum}>{s.num}</div>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.4' }}>{s.text}</p>
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', lineHeight: '1.55' }}>{s.text}</p>
               </div>
             ))}
           </div>
 
           {/* Paket Token */}
           <div style={styles.packagesBox}>
-            <p style={{ margin: '0 0 0.75rem', fontSize: '0.65rem', fontWeight: '900', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '2px' }}>
+            <p style={{ margin: '0 0 0.75rem', fontSize: '0.7rem', fontWeight: '900', color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '2px' }}>
               Paket Token
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
@@ -446,7 +446,7 @@ const styles = {
   footerNote: {
     textAlign: 'center',
     fontSize: '0.68rem',
-    color: 'rgba(255,255,255,0.2)',
+    color: 'rgba(255,255,255,0.35)',
     marginTop: '1rem',
     lineHeight: '1.5',
   },

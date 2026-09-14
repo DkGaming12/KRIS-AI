@@ -459,7 +459,7 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
       </aside>
 
       <main className="main-content animate-fade">
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '2rem' }}>
+        <div className="main-content-inner">
           {children}
         </div>
       </main>
@@ -1425,7 +1425,7 @@ Konteks terakhir (lanjutkan dari sini):
                   <p>Sistem Pabrikasi Novel Tercepat & Cerdas</p>
                 </div>
                 {step > 1 && (
-                  <button className="btn-secondary" onClick={handleCreateNewNovel} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <button className="btn-secondary" onClick={handleCreateNewNovel} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <PlusCircle size={16} /> Mulai Novel Baru
                   </button>
                 )}
@@ -1453,14 +1453,14 @@ Konteks terakhir (lanjutkan dari sini):
               })}
             </div>
 
-            <div className="premium-card-v2 animate-fade" style={{padding: "2.5rem", borderRadius: "1.5rem", border: "1px solid rgba(255,255,255,0.08)"}}>
+            <div className="premium-card-v2 animate-fade" style={{padding: "2.5rem", borderRadius: "1.5rem"}}>
               {step === 1 && (
                 <div>
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <Settings size={24} color="var(--brand-primary)" /> Tahap 1: Setup Dasar
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>Tentukan arah cerita, judul, dan persona novelmu secara mendetail.</p>
+                    <p>Tentukan arah cerita, judul, dan persona novelmu secara mendetail.</p>
                   </div>
                   
                   <div className="grid-2">
@@ -1496,11 +1496,11 @@ Konteks terakhir (lanjutkan dari sini):
                     </div>
                   </div>
 
-                  <div style={{ marginTop: '32px', marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header" style={{ marginTop: '2rem' }}>
+                    <h2>
                       <Sparkles size={24} color="var(--brand-primary)" /> Ide Cerita (Premis & Blurb)
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>Racik ide cerita dari pilihan atau tulis sendiri, AI akan menyempurnakannya.</p>
+                    <p>Racik ide cerita dari pilihan atau tulis sendiri, AI akan menyempurnakannya.</p>
                   </div>
 
                   <div className="neon-border" style={{borderRadius: '16px', padding: '24px', marginBottom: '32px', background: 'linear-gradient(145deg, rgba(139, 92, 246, 0.05), rgba(0,0,0,0))'}}>
@@ -1567,11 +1567,11 @@ Konteks terakhir (lanjutkan dari sini):
 
               {step === 2 && (
                 <div className="fade-in">
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <User size={24} color="var(--brand-primary)" /> Tahap 2: Pengembangan Karakter
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>AI telah merekomendasikan karakter berdasarkan premismu. Silakan edit profil ini sebebasnya jika ada yang kurang cocok.</p>
+                    <p>AI telah merekomendasikan karakter berdasarkan premismu. Silakan edit profil ini sebebasnya jika ada yang kurang cocok.</p>
                   </div>
                   
                   <textarea className="form-textarea" 
@@ -1581,7 +1581,7 @@ Konteks terakhir (lanjutkan dari sini):
                   />
                   
                   <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                    <button className="btn-primary" style={{background: "var(--glass-bg)", border: "1px solid var(--border-color)", color: "var(--text-primary)"}} onClick={() => setStep(1)}>Kembali</button>
+                    <button className="btn-secondary" onClick={() => setStep(1)}>Kembali</button>
                     <button className="btn-primary" onClick={handleGenerateWorld} disabled={loading}>
                       {loading ? <span className="loader"></span> : 'Lanjut ke Dunia'}
                       {!loading && <ChevronRight size={18} />}
@@ -1592,11 +1592,11 @@ Konteks terakhir (lanjutkan dari sini):
 
               {step === 3 && (
                 <div className="fade-in">
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <Globe size={24} color="var(--brand-primary)" /> Tahap 3: World Building
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>Latar tempat dan aturan dunia telah disusun oleh AI. Periksa dan modifikasi jika diperlukan.</p>
+                    <p>Latar tempat dan aturan dunia telah disusun oleh AI. Periksa dan modifikasi jika diperlukan.</p>
                   </div>
                   
                   <textarea className="form-textarea" 
@@ -1606,7 +1606,7 @@ Konteks terakhir (lanjutkan dari sini):
                   />
                   
                   <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                    <button className="btn-primary" style={{background: "var(--glass-bg)", border: "1px solid var(--border-color)", color: "var(--text-primary)"}} onClick={() => setStep(2)}>Kembali</button>
+                    <button className="btn-secondary" onClick={() => setStep(2)}>Kembali</button>
                     <button className="btn-primary" onClick={handleGenerateOutline} disabled={loading}>
                       {loading ? <span className="loader"></span> : 'Lanjut ke Outline'}
                       {!loading && <ChevronRight size={18} />}
@@ -1617,11 +1617,11 @@ Konteks terakhir (lanjutkan dari sini):
 
               {step === 4 && (
                 <div className="fade-in">
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <FileText size={24} color="var(--brand-primary)" /> Tahap 4: Kerangka Plot (Outline)
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>Berikut adalah kerangka alur novel per bab. Kamu bisa menyuntingnya untuk mengubah arah cerita.</p>
+                    <p>Berikut adalah kerangka alur novel per bab. Kamu bisa menyuntingnya untuk mengubah arah cerita.</p>
                   </div>
                   
                   <textarea className="form-textarea" 
@@ -1631,7 +1631,7 @@ Konteks terakhir (lanjutkan dari sini):
                   />
                   
                   <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                    <button className="btn-primary" style={{background: "var(--glass-bg)", border: "1px solid var(--border-color)", color: "var(--text-primary)"}} onClick={() => setStep(3)}>Kembali</button>
+                    <button className="btn-secondary" onClick={() => setStep(3)}>Kembali</button>
                     <button className="btn-primary" onClick={() => {
                       if (novelData.chapters.length === 0) {
                         updateData('chapters', Array(novelData.targetChapters).fill(''));
@@ -1647,18 +1647,18 @@ Konteks terakhir (lanjutkan dari sini):
 
               {step === 5 && (
                 <div className="fade-in">
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <BookOpen size={24} color="var(--brand-primary)" /> Tahap 5: Editor Bab
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>AI akan menulis episode demi episode. Word count ditargetkan akurat sesuai inputmu di awal.</p>
+                    <p>AI akan menulis episode demi episode. Word count ditargetkan akurat sesuai inputmu di awal.</p>
                   </div>
 
                   <div style={{display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap'}}>
                     {novelData.chapters.map((_, idx) => (
                       <button 
                         key={idx} 
-                        className={`btn ${currentChapterIndex === idx ? 'btn-primary' : 'btn-secondary'}`}
+                        className={currentChapterIndex === idx ? 'btn-primary' : 'btn-secondary'}
                         onClick={() => setCurrentChapterIndex(idx)}
                         style={{padding: '8px 12px', fontSize: '0.9rem', background: currentChapterIndex === idx ? 'linear-gradient(135deg, #a855f7, #6366f1)' : 'var(--glass-bg)', border: currentChapterIndex === idx ? 'none' : '1px solid var(--border-color)'}}
                       >
@@ -1671,10 +1671,10 @@ Konteks terakhir (lanjutkan dari sini):
                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
                       <h3 style={{margin: 0, fontSize: '1.2rem', color: 'var(--brand-primary)'}}>Editor Episode {currentChapterIndex + 1}</h3>
                       <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                        <button onClick={handleCopyChapter} className="btn-secondary" style={{padding: '4px 12px', fontSize: '0.85rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-primary)', cursor: 'pointer', transition: 'background 0.2s'}}>
+                        <button onClick={handleCopyChapter} className="btn-secondary" style={{padding: '4px 12px', fontSize: '0.85rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px'}}>
                           <Copy size={14} /> Salin Bab
                         </button>
-                        <div style={{fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.3)', padding: '4px 12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)'}}>
+                        <div style={{fontSize: '0.85rem', color: '#cbd5e1', background: 'rgba(0,0,0,0.35)', padding: '4px 12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)'}}>
                           <strong style={{color: 'white'}}>{countWords(novelData.chapters[currentChapterIndex] || '')}</strong> / {novelData.targetWordsPerChapter} kata
                         </div>
                       </div>
@@ -1697,7 +1697,7 @@ Konteks terakhir (lanjutkan dari sini):
                   </div>
                   
                   <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '24px', alignItems: 'center'}}>
-                    <button className="btn-primary" style={{background: "var(--glass-bg)", border: "1px solid var(--border-color)", color: "var(--text-primary)"}} onClick={() => {
+                    <button className="btn-secondary" onClick={() => {
                       if (currentChapterIndex > 0) {
                         setCurrentChapterIndex(prev => prev - 1);
                       } else {
@@ -1706,10 +1706,10 @@ Konteks terakhir (lanjutkan dari sini):
                     }}>Kembali</button>
                     
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-secondary" onClick={handleProofreadChapter} disabled={loading} style={{background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                      <button className="btn-secondary" onClick={handleProofreadChapter} disabled={loading} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                         {loading ? <span className="loader"></span> : <><Wrench size={18} /> Koreksi AI</>}
                       </button>
-                      <button className="btn-primary" onClick={handleGenerateChapter} disabled={loading} style={{background: 'linear-gradient(135deg, #a855f7, #6366f1)', padding: '8px 16px', borderRadius: '8px', border: 'none', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}}>
+                      <button className="btn-primary" onClick={handleGenerateChapter} disabled={loading} style={{background: 'linear-gradient(135deg, #a855f7, #6366f1)', display: 'flex', alignItems: 'center', gap: '8px'}}>
                         {loading ? <span className="loader"></span> : <><PenTool size={18} /> Tulis / Lanjutkan Episode {currentChapterIndex + 1}</>}
                       </button>
                     </div>
@@ -1724,11 +1724,11 @@ Konteks terakhir (lanjutkan dari sini):
 
               {step === 6 && (
                 <div className="fade-in">
-                  <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div className="step-header">
+                    <h2>
                       <Save size={24} color="var(--brand-primary)" /> Tahap 6: Finalisasi & Ekspor
                     </h2>
-                    <p style={{color: 'var(--text-secondary)', marginTop: '8px', fontSize: '0.9rem'}}>Karyamu sudah siap. Periksa cover dan detail, lalu unduh dalam format yang kamu inginkan.</p>
+                    <p>Karyamu sudah siap. Periksa cover dan detail, lalu unduh dalam format yang kamu inginkan.</p>
                   </div>
 
                   <div className="grid-2" style={{alignItems: 'start'}}>
@@ -1781,23 +1781,23 @@ Konteks terakhir (lanjutkan dari sini):
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', width: '30%', verticalAlign: 'top'}}>Judul</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', width: '70%', verticalAlign: 'top'}}>{novelData.title || '-'}</td>
                             </tr>
-                            <tr style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                            <tr style={{borderTop: '1px solid var(--border-color)'}}>
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', verticalAlign: 'top'}}>Penulis</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', verticalAlign: 'top'}}>{novelData.penName || '-'}</td>
                             </tr>
-                            <tr style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                            <tr style={{borderTop: '1px solid var(--border-color)'}}>
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', verticalAlign: 'top'}}>Genre</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', verticalAlign: 'top'}}>{novelData.genre || (ideaForm.genre !== 'Bebas / Terserah AI' ? ideaForm.genre : 'Diadaptasi Otomatis (Generate ulang ide)')}</td>
                             </tr>
-                            <tr style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                            <tr style={{borderTop: '1px solid var(--border-color)'}}>
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', verticalAlign: 'top'}}>Gaya Bahasa</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', verticalAlign: 'top'}}>{Array.isArray(novelData.style) ? novelData.style.join(', ') : (novelData.style || '-')}</td>
                             </tr>
-                            <tr style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                            <tr style={{borderTop: '1px solid var(--border-color)'}}>
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', verticalAlign: 'top'}}>Total Bab</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', verticalAlign: 'top'}}>{novelData.chapters.length} Bab</td>
                             </tr>
-                            <tr style={{borderTop: '1px solid rgba(255,255,255,0.05)'}}>
+                            <tr style={{borderTop: '1px solid var(--border-color)'}}>
                               <td style={{padding: '12px 0', color: 'var(--text-secondary)', verticalAlign: 'top'}}>Total Kata</td>
                               <td style={{padding: '12px 0', fontWeight: 'bold', verticalAlign: 'top'}}>{novelData.chapters.reduce((acc, chap) => acc + countWords(chap || ''), 0).toLocaleString()} Kata</td>
                             </tr>
@@ -1824,7 +1824,7 @@ Konteks terakhir (lanjutkan dari sini):
                             </div>
                           </button>
 
-                          <button className="btn-secondary" onClick={handleExportMarkdown} style={{padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-primary)', borderRadius: '999px'}}>
+                          <button className="btn-secondary" onClick={handleExportMarkdown} style={{padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', borderRadius: '999px'}}>
                             <Download size={20} />
                             <div style={{textAlign: 'left'}}>
                               <div style={{fontWeight: 'bold'}}>Unduh Markdown (.md)</div>
@@ -1837,7 +1837,7 @@ Konteks terakhir (lanjutkan dari sini):
                   </div>
 
                   <div style={{marginTop: '40px', textAlign: 'center', display: 'flex', gap: '12px', justifyContent: 'center'}}>
-                    <button className="btn-secondary" style={{padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-primary)', borderRadius: '999px'}} onClick={() => setStep(5)}>
+                    <button className="btn-secondary" style={{padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px', borderRadius: '999px'}} onClick={() => setStep(5)}>
                       <ChevronRight size={18} style={{transform: 'rotate(180deg)'}} /> Kembali ke Penulisan
                     </button>
                     <button className="btn-primary" style={{padding: '12px 24px', display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, #10b981, #059669)'}} onClick={startSequel}>

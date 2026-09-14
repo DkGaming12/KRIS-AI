@@ -40,10 +40,9 @@ function Feedback({ type, message }) {
 function Section({ icon, title, children }) {
   return (
     <div className="premium-card-v2" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.25rem' }}>
-        {icon}
-        <h2 style={{ fontSize: '1rem', fontWeight: '800', margin: 0 }}>{title}</h2>
-      </div>
+      <h2 className="section-title" style={{ fontSize: '1rem', marginBottom: '1.25rem' }}>
+        {icon} {title}
+      </h2>
       {children}
     </div>
   );
@@ -194,9 +193,16 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '680px', margin: '0 auto', width: '100%' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <User size={24} color="#a5b4fc" />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Pengaturan Akun</h1>
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon" style={{ background: 'linear-gradient(135deg, #818cf8, #6366f1)' }}>
+            <User size={22} />
+          </div>
+          <div>
+            <h1 className="view-title">Pengaturan Akun</h1>
+            <p className="view-subtitle">Kelola profil, keamanan, dan tampilan</p>
+          </div>
+        </div>
       </div>
 
       {/* Profile info */}
@@ -225,7 +231,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
 
       {/* ── Ubah Username ── */}
       <Section icon={<User size={17} color="#a5b4fc" />} title="Ubah Nama Tampilan">
-        <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '6px' }}>
+        <label className="field-label">
           Nama Tampilan
         </label>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -257,7 +263,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
             <p style={{ margin: '0 0 10px 0', fontSize: '0.82rem', color: '#fbbf24', fontWeight: '700' }}>Mode Administrator Aktif</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+                <label className="field-label">
                   Email Pengguna
                 </label>
                 <input
@@ -270,7 +276,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+                <label className="field-label">
                   Jumlah Token
                 </label>
                 <input
@@ -305,7 +311,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+                <label className="field-label">
                   Email
                 </label>
                 <input
@@ -318,7 +324,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+                <label className="field-label">
                   Password
                 </label>
                 <input
@@ -331,7 +337,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+                <label className="field-label">
                   Bonus Token Awal
                 </label>
                 <input
@@ -365,7 +371,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
       <Section icon={<Lock size={17} color="#f472b6" />} title="Ubah Password">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+            <label className="field-label">
               Password Saat Ini
             </label>
             <input
@@ -377,7 +383,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
             />
           </div>
           <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+            <label className="field-label">
               Password Baru
             </label>
             <input
@@ -389,7 +395,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
             />
           </div>
           <div>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '5px' }}>
+            <label className="field-label">
               Konfirmasi Password Baru
             </label>
             <input
@@ -417,7 +423,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
         {/* Reset via admin */}
         <div style={{
           marginTop: '14px', padding: '12px 14px', borderRadius: '10px',
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+          background: 'var(--glass-bg)', border: '1px solid var(--border-color)',
           display: 'flex', alignItems: 'center', gap: '10px',
         }}>
           <ShieldAlert size={16} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
@@ -447,7 +453,7 @@ export default function PengaturanAkunView({ theme, toggleTheme }) {
               style={{
                 flex: 1, padding: '12px', borderRadius: '10px',
                 background: theme === t ? 'rgba(99,102,241,0.1)' : 'transparent',
-                border: theme === t ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                border: theme === t ? '1px solid rgba(99,102,241,0.5)' : '1px solid var(--border-color)',
                 color: 'var(--text-primary)', cursor: 'pointer', transition: 'all 0.2s',
               }}
             >

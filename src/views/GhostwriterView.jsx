@@ -38,26 +38,28 @@ export default function GhostwriterView({ getClient, spendTokens }) {
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Ghost size={24} color="#8b5cf6" />
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6d28d9)' }}>
+            <Ghost size={22} />
+          </div>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0 }}>Ghostwriter</h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '2px' }}>AI akan melanjutkan tulisanmu saat kamu buntu.</p>
+            <h1 className="view-title">Ghostwriter</h1>
+            <p className="view-subtitle">AI akan melanjutkan tulisanmu saat kamu buntu.</p>
           </div>
         </div>
-        <button 
-          className="btn-primary" 
-          onClick={handleContinue} 
+        <button
+          className="btn-primary"
+          onClick={handleContinue}
           disabled={isLoading || !content.trim()}
-          style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)' }}
+          style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)', whiteSpace: 'nowrap' }}
         >
           {isLoading ? <span className="loader"></span> : <><Wand2 size={16} /> Lanjutkan Tulisan</>}
         </button>
       </div>
 
       <div className="premium-card-v2" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
-        <div style={{ padding: '12px 20px', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '0.75rem 1.25rem', background: 'var(--glass-bg)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><PenTool size={14} /> Editor Fokus</span>
           </div>

@@ -97,24 +97,17 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 160px)', width: '100%' }}>
-      <div style={{
-        marginBottom: '1rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '12px',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: 'linear-gradient(135deg, #4f46e5, #0ea5e9)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 30px rgba(79,70,229,0.35)' }}>
-            <MessageSquare size={22} color="white" />
+      <div className="view-header">
+        <div className="view-header-left">
+          <div className="view-icon">
+            <MessageSquare size={22} />
           </div>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: '800', margin: 0, lineHeight: '1.1' }}>Chat AI</h1>
-            <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>Ngobrol, coding, debugging, dan diskusi kreatif</p>
+            <h1 className="view-title">Chat AI</h1>
+            <p className="view-subtitle">Ngobrol, coding, debugging, dan diskusi kreatif</p>
           </div>
         </div>
-        <div style={{ padding: '8px 12px', borderRadius: '999px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.18)', color: '#a5b4fc', fontSize: '0.72rem', fontWeight: '800', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+        <div className="chip brand" style={{ textTransform: 'uppercase' }}>
           Beta
         </div>
       </div>
@@ -125,12 +118,12 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
             <Sparkles size={14} color="#60a5fa" />
             <span>Kris AI siap membantu dengan jawaban yang ringkas dan langsung pakai.</span>
           </div>
-          <div style={{ padding: '6px 10px', borderRadius: '999px', background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.18)', color: '#16a34a', fontSize: '0.72rem', fontWeight: '800' }}>
+          <div className="chip success">
             Token: {tokenBalance.toLocaleString('id-ID')}
           </div>
         </div>
 
-        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.15rem 1.15rem 1rem' }}>
+        <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.25rem' }}>
           {messages.map((msg, idx) => (
             <div key={idx} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: msg.role === 'user' ? 'row-reverse' : 'row' }}>
               <div style={{
@@ -173,9 +166,9 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
 
         {tokenBalance <= 0 ? (
           /* ── Token habis — tampilkan pesan beli token ── */
-          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border-color)' }}>
             <div style={{
-              padding: '1rem 1rem 1.05rem', borderRadius: '16px', textAlign: 'center',
+              padding: '1.25rem', borderRadius: '16px', textAlign: 'center',
               background: 'var(--glass-bg)',
               border: '1px solid var(--border-color)',
             }}>
@@ -183,7 +176,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
               <p style={{ margin: '0 0 4px 0', fontWeight: '800', color: '#c4b5fd', fontSize: '0.95rem' }}>
                 Token Kamu Habis!
               </p>
-              <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: '1.5' }}>
+              <p style={{ margin: '0 0 14px 0', fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                 Beli token untuk melanjutkan obrolan dengan Kris AI.
               </p>
               <a
@@ -202,7 +195,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
             </div>
           </div>
         ) : (
-          <div style={{ padding: '1rem 1.15rem 1.15rem', borderTop: '1px solid var(--border-color)', background: 'var(--glass-bg)' }}>
+          <div style={{ padding: '1.25rem', borderTop: '1px solid var(--border-color)', background: 'var(--glass-bg)' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'stretch' }}>
               <textarea
                 className="form-textarea"
