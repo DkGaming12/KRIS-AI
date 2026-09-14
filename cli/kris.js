@@ -153,8 +153,8 @@ async function startREPL() {
   // Check provider
   const providers = getProviderStatus();
   const primary = providers[0];
-  const provName = primary?.name || 'Groq';
-  const provModel = primary?.models?.default || 'llama3-70b';
+  const provName = primary?.name || 'AgentRouter';
+  const provModel = primary?.model || 'glm-5.3';
 
   // Print header
   printHeader(provName, provModel);

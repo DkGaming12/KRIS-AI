@@ -16,11 +16,14 @@ import {
   printProviderSwitch,
 } from '../lib/ui.js';
 
-const SYSTEM_PROMPT = `Kamu adalah Kris AI, asisten penulis kreatif terbaik Indonesia.
-Kamu ahli dalam menulis novel, cerpen, puisi, dan konten kreatif.
-Gaya kamu: cerdas, hangat, kreatif, dan selalu memotivasi penulis.
-Jawab dalam Bahasa Indonesia kecuali diminta bahasa lain.
-Gunakan markdown untuk memformat jawaban kamu (bold, heading, list, code block jika diperlukan).`;
+// System prompt HARUS bahasa Inggris — AgentRouter memblokir request yang
+// terdeteksi berbahasa Indonesia (content-blocked). Model tetap diminta
+// menjawab dalam bahasa Indonesia lewat instruksi di bawah.
+const SYSTEM_PROMPT = `You are Kris AI, the best creative-writing assistant for Indonesian novelists.
+You are an expert in novels, short stories, poetry, and creative content.
+Your style: smart, warm, creative, and always motivating writers.
+IMPORTANT: Always respond in Indonesian (Bahasa Indonesia) unless the user explicitly asks for another language.
+Use markdown to format your answers (bold, headings, lists, code blocks when needed).`;
 
 export class ChatSession {
   constructor() {
