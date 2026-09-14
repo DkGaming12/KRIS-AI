@@ -143,9 +143,9 @@ const PROVIDERS = [
     envKey: 'VITE_GROQ_API_KEY',
     localStorageKey: 'kris_ai_groq_key',
     models: {
-      default: 'llama3-70b-8192',
-      powerful: 'llama3-70b-8192',
-      fast: 'llama3-8b-8192',
+      default: 'llama-3.3-70b-versatile',
+      powerful: 'llama-3.3-70b-versatile',
+      fast: 'llama-3.1-8b-instant',
     },
     alwaysAvailable: false,
     errorCodes: [429, 402, 403, 401],
