@@ -1,16 +1,26 @@
 import { Readable } from 'node:stream';
 
-const DEFAULT_BASE_URL =
-  process.env.AGENTROUTER_BASE_URL ||
-  process.env.VITE_AGENTROUTER_BASE_URL ||
-  process.env.VITE_OPENAI_BASE_URL ||
-  'https://agentrouter.org/v1';
+// AgentRouter menolak permintaan tanpa User-Agent klien yang dikenali
+// ("unauthorized client detected"), jadi proxy wajib mengirim UA klien AI.
+const CLIENT_USER_AGENT =
+  process.env.AGENTROUTER_CLIENT_UA ||
+  'codex_cli_rs/0.42.0 (Mac OS 15.6.0; arm64) terminal';
 
-const DEFAULT_API_KEY =
-  process.env.AGENTROUTER_API_KEY ||
-  process.env.VITE_AGENTROUTER_API_KEY ||
-  process.env.VITE_OPENAI_API_KEY ||
-  '';
+/** Resolve konfigurasi secara lazy supaya env tetap bisa di-inject saat dev */
+function getConfig() {
+  return {
+    baseUrl:
+      process.env.AGENTROUTER_BASE_URL ||
+      process.env.VITE_AGENTROUTER_BASE_URL ||
+      process.env.VITE_OPENAI_BASE_URL ||
+      'https://agentrouter.org/v1',
+    apiKey:
+      process.env.AGENTROUTER_API_KEY ||
+      process.env.VITE_AGENTROUTER_API_KEY ||
+      process.env.VITE_OPENAI_API_KEY ||
+      '',
+  };
+}
 
 async function readJsonBody(req) {
   const chunks = [];
@@ -32,7 +42,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!DEFAULT_API_KEY) {
+  const { baseUrl, apiKey } = getConfig();
+
+  if (!apiKey) {
     res.status(500).json({
       error: 'AgentRouter API key belum dikonfigurasi di environment server.',
     });
@@ -47,11 +59,12 @@ export default async function handler(req, res) {
     return;
   }
 
-  const upstream = await fetch(`${DEFAULT_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+  const upstream = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${DEFAULT_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
+      'User-Agent': CLIENT_USER_AGENT,
       Accept: body.stream ? 'text/event-stream' : 'application/json',
     },
     body: JSON.stringify(body),
@@ -59,6 +72,17 @@ export default async function handler(req, res) {
 
   if (!upstream.ok) {
     const errorText = await upstream.text();
+    // AgentRouter memblokir prompt berbahasa Indonesia (content-blocked);
+    // beri pesan yang jelas supaya user tahu penyebabnya.
+    if (errorText.includes('content-blocked')) {
+      res.status(upstream.status).json({
+        error:
+          'AgentRouter sedang memblokir konten berbahasa Indonesia (content-blocked). ' +
+          'Coba tulis prompt dalam bahasa Inggris, atau tambahkan API key Gemini/Groq ' +
+          'di Pengaturan Akun sebagai provider fallback.',
+      });
+      return;
+    }
     res.status(upstream.status).send(errorText || `AgentRouter error (${upstream.status})`);
     return;
   }

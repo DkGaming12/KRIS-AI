@@ -109,11 +109,13 @@ const PROVIDERS = [
     envKey: 'VITE_AGENTROUTER_API_KEY',   // env key yang dibaca
     legacyEnvKey: 'VITE_OPENAI_API_KEY',  // kompatibilitas lama
     localStorageKey: 'kris_ai_api_key',   // localStorage key (lama / compat)
-    // AgentRouter butuh model yang spesifik, jadi jangan pakai openrouter/auto.
+    // Model harus ada di daftar AgentRouter (/v1/models).
+    // glm-5.3 & deepseek-v4-flash aktif; model premium (claude-opus-5,
+    // gpt-6-astra, gpt-5.6-sol) sering budget-exhausted/blocked.
     models: {
-      default: 'gpt-5.5',
-      powerful: 'gpt-5.6',
-      fast: 'gpt-5.5',
+      default: 'glm-5.3',
+      powerful: 'glm-5.3',
+      fast: 'deepseek-v4-flash',
     },
     // AgentRouter dianggap "tersedia" kalau endpoint-nya reachable
     // Kita cek ketersediaannya via flag alwaysAvailable — tapi tetap fallback jika 402/429
