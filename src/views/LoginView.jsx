@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Sparkles, Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, Zap, User } from 'lucide-react';
+import { TOKEN_PACKAGES, WELCOME_GRANT } from '../constants/tokenPackages';
 
 const WA_ADMIN_NUMBER = '6285700660475';
 const WA_SIGNUP_MSG   = encodeURIComponent(
@@ -66,10 +67,8 @@ export default function LoginView({ onLogin, onGuestLogin, authError, setAuthErr
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               {[
-                { name: 'Welcome',  tokens: '10.000',  price: 'GRATIS', color: '#34d399', isWelcome: true },
-                { name: 'Starter',  tokens: '25.000',  price: 'Rp 25.000', color: '#60a5fa' },
-                { name: 'Basic',    tokens: '100.000', price: 'Rp 75.000', color: '#a78bfa' },
-                { name: 'Pro',      tokens: '300.000', price: 'Rp 199.000', color: '#f472b6' },
+                { name: WELCOME_GRANT.name, tokens: WELCOME_GRANT.tokens, price: WELCOME_GRANT.price, color: WELCOME_GRANT.color, isWelcome: true },
+                ...TOKEN_PACKAGES.map((p) => ({ name: p.name.replace('Paket ', ''), tokens: p.tokens, price: p.price, color: p.color })),
               ].map((pkg) => (
                 <div key={pkg.name} style={{
                   padding: '10px 12px', borderRadius: '10px',

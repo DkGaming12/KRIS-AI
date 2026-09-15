@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
-import { BookOpen, User, Globe, FileText, CheckCircle, Image as ImageIcon, Download, Settings, ChevronRight, Save, Sparkles, Sun, Moon, Menu, X, Home, MessageSquare, Ghost, Shield, Info, Zap, LogOut, Wrench, Music, Folder, Users, History, Coins, Edit3, Lightbulb, PenTool, Trash2, Plus, PlusCircle, Copy } from 'lucide-react';
+import { BookOpen, User, Globe, FileText, CheckCircle, Image as ImageIcon, Download, Settings, ChevronRight, Save, Sparkles, Sun, Moon, Menu, X, Home, MessageSquare, Ghost, Shield, Info, Zap, LogOut, Wrench, Music, Folder, Users, History, Coins, Edit3, Lightbulb, PenTool, Trash2, Plus, PlusCircle, Copy, Activity } from 'lucide-react';
 import ToolModal from './components/ToolModal';
 import TokenBadge from './components/TokenBadge';
 import TokenEmptyModal, { WA_BUY_LINK } from './components/TokenEmptyModal';
@@ -14,7 +14,10 @@ import GhostwriterView from './views/GhostwriterView';
 import RiwayatKaryaView from './views/RiwayatKaryaView';
 import PengaturanAkunView from './views/PengaturanAkunView';
 import TentangAppView from './views/TentangAppView';
+import TokenUsageView from './views/TokenUsageView';
 import LoginView from './views/LoginView';
+import TokenToast from './components/TokenToast';
+import TokenEstimate from './components/TokenEstimate';
 import { chatWithFallback } from './lib/aiClient';
 import { useAuth } from './lib/authStore';
 
@@ -371,6 +374,14 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
                   <span>Riwayat Karya</span>
                 </div>
               </button>
+              <button className={`nav-item ${currentView === 'tokenusage' ? 'active' : ''}`} onClick={() => setCurrentView('tokenusage')}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: currentView === 'tokenusage' ? 'rgba(165, 180, 252, 0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                    <Activity size={16} color={currentView === 'tokenusage' ? '#a5b4fc' : 'var(--text-secondary)'} />
+                  </div>
+                  <span>Pemakaian Token</span>
+                </div>
+              </button>
               <button className={`nav-item ${currentView === 'pengaturan' ? 'active' : ''}`} onClick={() => setCurrentView('pengaturan')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: currentView === 'pengaturan' ? 'rgba(165, 180, 252, 0.15)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
@@ -475,7 +486,7 @@ const MainLayoutWrapper = ({ children, isSidebarOpen, setIsSidebarOpen, isToolsO
 
 export default function App() {
   // ─── Auth ────────────────────────────────────────────────────────────────
-  const { user, userProfile, tokenBalance, loading: authLoading, authError, setAuthError, signIn, signInAsGuest, signOut, spendTokens, isAuthenticated } = useAuth();
+  const { user, userProfile, tokenBalance, loading: authLoading, authError, setAuthError, signIn, signInAsGuest, signOut, spendTokens, spendUsage, isAuthenticated } = useAuth();
   const isGuestMode = Boolean(user?.isGuest || userProfile?.isGuest);
   
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -509,6 +520,8 @@ export default function App() {
   const [isToolsOpen, setIsToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState(null);
   const [theme, setTheme] = useState('dark');
+  // Pemakaian token terakhir (untuk toast global)
+  const [lastSpend, setLastSpend] = useState(null);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
@@ -710,12 +723,66 @@ export default function App() {
   };
 
   // Fungsi wrapper getClient — untuk kompatibilitas dengan ChatAIView & GhostwriterView
+  // Metering: setiap request yang lewat sini otomatis tercatat & memotong saldo
+  // via spendUsage. View tinggal menandai feature lewat params.__feature.
   const getClient = () => ({
     chat: {
       completions: {
-        create: (params) => chatWithFallback(params, setActiveProvider)
-      }
-    }
+        create: (params) => {
+          const feature = params.__feature || 'fallback';
+          const cleanParams = { ...params };
+          delete cleanParams.__feature;
+          const inputText = (cleanParams.messages || [])
+            .map((m) => (typeof m?.content === 'string' ? m.content : ''))
+            .join(' ');
+
+          let outputText = '';
+          let metered = false;
+          let pendingUsage = null; // {usage, padChars} — dari onUsage jalur stream
+          const meter = async (usage, padChars) => {
+            if (metered) return;
+            metered = true;
+            const result = await spendUsage({
+              feature,
+              usage,
+              padChars,
+              fallbackInput: inputText,
+              fallbackOutput: outputText,
+            });
+            if (result) setLastSpend({ ...result, feature, key: Date.now() });
+          };
+
+          return chatWithFallback(cleanParams, {
+            onProviderSwitch: setActiveProvider,
+            // Jalur stream: simpan dulu — metering dijalankan SETELAH iterasi
+            // selesai (outputText sudah lengkap) di accumulateStream di bawah.
+            // Non-stream di-meter di .then dengan alasan yang sama.
+            onUsage: ({ usage, padChars }) => {
+              if (cleanParams.stream) pendingUsage = { usage, padChars };
+            },
+          }).then((res) => {
+            if (cleanParams.stream && res && typeof res[Symbol.asyncIterator] === 'function') {
+              // Bungkus: akumulasi teks output dari delta chunk, pass-through
+              // apa adanya. Iterasi selesai → meter dengan output lengkap.
+              async function* accumulateStream() {
+                for await (const chunk of res) {
+                  const delta = chunk?.choices?.[0]?.delta?.content;
+                  if (delta) outputText += delta;
+                  yield chunk;
+                }
+                meter(pendingUsage?.usage || null, pendingUsage?.padChars || 0);
+              }
+              return accumulateStream();
+            }
+            if (res?.choices?.[0]?.message?.content) {
+              outputText = res.choices[0].message.content;
+            }
+            meter(res?.usage || null, res?.__krisPadChars || 0);
+            return res;
+          });
+        },
+      },
+    },
   });
 
   // ─── Helper: Deteksi teks repetitif, rusak, atau gibberish (degenerasi model) ───
@@ -840,13 +907,27 @@ ATURAN PENULISAN:
 
 Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan penerbit mayor (Best Seller). INGAT: SELURUH TEKS HARUS DALAM BAHASA INDONESIA.`;
 
-  const generateText = async (prompt, systemMessage = DEFAULT_SYSTEM_MESSAGE, retryCount = 0) => {
+  const generateText = async (prompt, systemMessage = DEFAULT_SYSTEM_MESSAGE, retryCount = 0, feature = 'fallback') => {
     setLoading(true);
     try {
       // Pada retry: naikkan temperature, dan hapus penalty agar model lebih bebas
       const temp = Math.min(0.7 + (retryCount * 0.2), 1.0);
       const freqPenalty = retryCount === 0 ? 0.15 : 0;
       const presPenalty = retryCount === 0 ? 0.1 : 0;
+      let outputText = '';
+      let metered = false;
+      const meter = async (usage, padChars) => {
+        if (metered) return;
+        metered = true;
+        const result = await spendUsage({
+          feature,
+          usage,
+          padChars,
+          fallbackInput: `${systemMessage}\n${prompt}`,
+          fallbackOutput: outputText,
+        });
+        if (result) setLastSpend({ ...result, feature, key: Date.now() });
+      };
       const response = await chatWithFallback({
         model: novelData.modelName || 'auto',
         messages: [
@@ -857,21 +938,25 @@ Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan p
         max_tokens: 8000,
         frequency_penalty: freqPenalty,
         presence_penalty: presPenalty,
-      }, setActiveProvider);
+      }, {
+        onProviderSwitch: setActiveProvider,
+        // Non-stream: metering cukup di bawah (line 946) setelah outputText
+        // terisi — onUsage di sini malah bisa jalan terlalu cepat (output
+        // masih kosong) sehingga estimasi fallback kehilangan token output.
+      });
       let content = response.choices[0].message.content;
+      outputText = content;
       content = content.replace(/<think>[\s\S]*?<\/think>/, '').trim();
+      meter(response.usage || null, response.__krisPadChars || 0);
 
       // Deteksi repetisi — jika terdeteksi, retry dengan temperature lebih tinggi
       if (detectRepetition(content) && retryCount < 2) {
         console.warn(`[generateText] Repetisi terdeteksi (percobaan ke-${retryCount + 1}), retry dengan temperature lebih tinggi...`);
-        return generateText(prompt, systemMessage, retryCount + 1);
+        metered = false; // izinkan metering ulang di percobaan berikutnya
+        return generateText(prompt, systemMessage, retryCount + 1, feature);
       }
 
-      // ── Kurangi token diam-diam berdasarkan panjang output ──
-      // User tidak tahu berapa yang dipotong, hanya lihat saldo turun pelan
-      if (user && content) {
-        spendTokens(content).catch(() => {}); // fire-and-forget, jangan blokir UI
-      }
+      // Metering sudah dilakukan lewat meter() di atas (usage API asli).
 
       return content;
     } catch (error) {
@@ -886,7 +971,7 @@ Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan p
   const handleGenerateCharacters = async () => {
     const styleText = Array.isArray(novelData.style) ? novelData.style.join(', ') : novelData.style;
     const prompt = `Premis: ${novelData.premise}\nBlurb: ${novelData.blurb}\nGaya Bahasa: ${styleText}${novelData.previousContext ? `\n\nKonteks Kejadian Buku Sebelumnya:\n${novelData.previousContext}` : ''}\nBuatlah profil untuk 3-5 karakter utama (Nama, Penampilan, Kepribadian, Motivasi). WAJIB tulis dalam Bahasa Indonesia.`;
-    const result = await generateText(prompt);
+    const result = await generateText(prompt, undefined, 0, 'gen_karakter');
     if (result) {
         updateData('characters', result);
         setStep(2);
@@ -895,7 +980,7 @@ Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan p
 
   const handleGenerateWorld = async () => {
     const prompt = `Premis: ${novelData.premise}\nKarakter:\n${novelData.characters}${novelData.previousContext ? `\n\nKonteks Kejadian Buku Sebelumnya:\n${novelData.previousContext}` : ''}\nBuatlah deskripsi tentang dunia/latar tempat cerita ini berlangsung (Lokasi, Waktu, Atmosfer, Aturan Khusus). WAJIB tulis dalam Bahasa Indonesia.`;
-    const result = await generateText(prompt);
+    const result = await generateText(prompt, undefined, 0, 'gen_dunia');
     if (result) {
         updateData('world', result);
         setStep(3);
@@ -904,7 +989,7 @@ Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan p
 
   const handleGenerateOutline = async () => {
     const prompt = `Target Episode: ${novelData.targetChapters}\nPremis: ${novelData.premise}\nKarakter:\n${novelData.characters}\nDunia:\n${novelData.world}${novelData.previousContext ? `\n\nKonteks Kejadian Buku Sebelumnya:\n${novelData.previousContext}` : ''}\nBuatlah kerangka plot episode-demi-episode dalam BAHASA INDONESIA. Berikan judul setiap episode dan ringkasan kejadiannya. Pastikan jumlahnya tepat ${novelData.targetChapters} episode.`;
-    const result = await generateText(prompt);
+    const result = await generateText(prompt, undefined, 0, 'gen_outline');
     if (result) {
         updateData('outline', result);
         setStep(4);
@@ -917,7 +1002,7 @@ Tugasmu menghasilkan teks BERBAHASA INDONESIA berkualitas setara buku terbitan p
       const styleText = Array.isArray(novelData.style) ? novelData.style.join(', ') : novelData.style;
       
       const taglinePrompt = `Buatlah SATU kalimat epik pendek (maksimal 8-10 kata) yang misterius atau dramatis untuk tagline poster novel berjudul "${novelData.title}". Berdasarkan blurb: ${novelData.blurb}. HANYA BERIKAN TEKS TAGLINE-NYA SAJA (tanpa tanda kutip, tanpa penjelasan).`;
-      let tagline = await generateText(taglinePrompt);
+      let tagline = await generateText(taglinePrompt, undefined, 0, 'gen_cover');
       tagline = (tagline || "Antara Cahaya dan Kegelapan, Sebuah Takdir Terukir.").replace(/['"]/g, '').toUpperCase();
       
       const promptDesigner = `Kamu adalah ahli pembuat prompt gambar AI untuk BACKGROUND cover novel. 
@@ -935,7 +1020,7 @@ ATURAN GAYA VISUAL:
 - Portrait 2:3 vertical layout
 - ABSOLUTELY NO TEXT OR LETTERS IN THE IMAGE`;
 
-      let optimizedPrompt = await generateText(promptDesigner);
+      let optimizedPrompt = await generateText(promptDesigner, undefined, 0, 'gen_cover');
       optimizedPrompt = optimizedPrompt ? optimizedPrompt.trim() : `A professional background art for a novel cover. ${novelData.premise ? novelData.premise.substring(0, 150) : ''}. Style: ${styleText}, 2D digital illustration, highly detailed, cinematic lighting. No text, no letters, no words.`;
       
       const randomSeed = Math.floor(Math.random() * 1000000);
@@ -1010,7 +1095,7 @@ GENRE: [1-2 Genre spesifik novel ini, misal: Fantasy Romance, Sci-Fi Thriller, d
 PREMIS: [Premis singkat 1-2 kalimat]
 BLURB: [Sinopsis belakang buku yang memancing rasa penasaran, 2-3 paragraf]
 GAYA: [Gaya bahasa yang direkomendasikan]`;
-      const result = await generateText(prompt);
+      const result = await generateText(prompt, undefined, 0, 'gen_ide');
       if (result) {
         const titleMatch = result.match(/JUDUL:\s*(.*)/i);
         const genreMatch = result.match(/GENRE:\s*(.*)/i);
@@ -1052,7 +1137,7 @@ TEKS YANG HARUS DIKOREKSI:
 ${chapterContent}`;
 
     try {
-      const result = await generateText(prompt);
+      const result = await generateText(prompt, undefined, 0, 'gen_koreksi');
       if (result) {
         const newChapters = [...novelData.chapters];
         newChapters[currentChapterIndex] = result.trim();
@@ -1146,7 +1231,7 @@ Konteks terakhir (lanjutkan dari sini):
 "... ${chapterContent.slice(-1500)}"`;
         }
 
-        const chunk = await generateText(prompt);
+        const chunk = await generateText(prompt, undefined, 0, 'gen_episode');
         if (!chunk) break;
 
         // Jika chunk terdeteksi repetitif meski sudah retry, skip chunk ini
@@ -1334,6 +1419,7 @@ Konteks terakhir (lanjutkan dari sini):
   return (
     <>
     {showTokenModal && <TokenEmptyModal onClose={() => setShowTokenModal(false)} />}
+    <TokenToast spend={lastSpend} />
     <MainLayoutWrapper
       isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
       isToolsOpen={isToolsOpen} setIsToolsOpen={setIsToolsOpen}
@@ -1352,9 +1438,9 @@ Konteks terakhir (lanjutkan dari sini):
         <>
           {currentView === 'beranda' && <BerandaView setCurrentView={setCurrentView} />}
           {currentView === 'belitoken' && <BeliTokenView />}
-          {currentView === 'makalah' && <MakalahView getClient={getClient} spendTokens={spendTokens} tokenBalance={tokenBalance} />}
-          {currentView === 'chat' && <ChatAIView getClient={getClient} spendTokens={spendTokens} tokenBalance={tokenBalance} />}
-          {currentView === 'ghostwriter' && <GhostwriterView getClient={getClient} spendTokens={spendTokens} />}
+          {currentView === 'makalah' && <MakalahView getClient={getClient} tokenBalance={tokenBalance} />}
+          {currentView === 'chat' && <ChatAIView getClient={getClient} tokenBalance={tokenBalance} />}
+          {currentView === 'ghostwriter' && <GhostwriterView getClient={getClient} />}
           {currentView === 'riwayat' && (
             <RiwayatKaryaView 
               onExportWord={handleExportWord}
@@ -1415,6 +1501,7 @@ Konteks terakhir (lanjutkan dari sini):
             />
           )}
           {currentView === 'pengaturan' && <PengaturanAkunView theme={theme} toggleTheme={toggleTheme} />}
+          {currentView === 'tokenusage' && <TokenUsageView user={user} />}
           {currentView === 'tentang' && <TentangAppView />}
           
           {currentView === 'generator' && (
@@ -1536,6 +1623,9 @@ Konteks terakhir (lanjutkan dari sini):
                     <button className="btn-primary" onClick={handleAutoGenerateIdeas} disabled={loading || !ideaForm.rawIdea.trim()} style={{width: '100%', padding: '14px', marginTop: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'}}>
                       {loading ? <span className="loader"></span> : <><Sparkles size={18} /> Rapihkan Jadi Premis & Blurb</>}
                     </button>
+                    <div style={{display: 'flex', justifyContent: 'center', marginTop: '10px'}}>
+                      <TokenEstimate min={400} max={800} />
+                    </div>
                   </div>
 
                   <div className="form-group">
@@ -1556,7 +1646,8 @@ Konteks terakhir (lanjutkan dari sini):
                     />
                   </div>
 
-                  <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
+                  <TokenEstimate min={500} max={900} suffix=" — AI membuat profil karakter" />
+                  <div style={{display: 'flex', gap: '12px', marginTop: '10px'}}>
                     <button className="btn-primary" style={{width: '100%'}} onClick={handleGenerateCharacters} disabled={loading}>
                       {loading ? <span className="loader"></span> : 'Lanjut ke Karakter'}
                       {!loading && <ChevronRight size={18} />}
@@ -1580,7 +1671,8 @@ Konteks terakhir (lanjutkan dari sini):
                     onChange={e => updateData('characters', e.target.value)}
                   />
                   
-                  <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
+                  <TokenEstimate min={500} max={900} suffix=" — AI membangun dunia" />
+                  <div style={{display: 'flex', gap: '12px', marginTop: '10px'}}>
                     <button className="btn-secondary" onClick={() => setStep(1)}>Kembali</button>
                     <button className="btn-primary" onClick={handleGenerateWorld} disabled={loading}>
                       {loading ? <span className="loader"></span> : 'Lanjut ke Dunia'}
@@ -1605,7 +1697,8 @@ Konteks terakhir (lanjutkan dari sini):
                     onChange={e => updateData('world', e.target.value)}
                   />
                   
-                  <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
+                  <TokenEstimate min={600} max={1000} suffix=" — AI menyusun outline" />
+                  <div style={{display: 'flex', gap: '12px', marginTop: '10px'}}>
                     <button className="btn-secondary" onClick={() => setStep(2)}>Kembali</button>
                     <button className="btn-primary" onClick={handleGenerateOutline} disabled={loading}>
                       {loading ? <span className="loader"></span> : 'Lanjut ke Outline'}
@@ -1696,7 +1789,7 @@ Konteks terakhir (lanjutkan dari sini):
                     />
                   </div>
                   
-                  <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '24px', alignItems: 'center'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '24px', alignItems: 'center', flexWrap: 'wrap', gap: '12px'}}>
                     <button className="btn-secondary" onClick={() => {
                       if (currentChapterIndex > 0) {
                         setCurrentChapterIndex(prev => prev - 1);
@@ -1704,14 +1797,28 @@ Konteks terakhir (lanjutkan dari sini):
                         setStep(4);
                       }
                     }}>Kembali</button>
-                    
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-secondary" onClick={handleProofreadChapter} disabled={loading} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                        {loading ? <span className="loader"></span> : <><Wrench size={18} /> Koreksi AI</>}
-                      </button>
-                      <button className="btn-primary" onClick={handleGenerateChapter} disabled={loading} style={{background: 'linear-gradient(135deg, #a855f7, #6366f1)', display: 'flex', alignItems: 'center', gap: '8px'}}>
-                        {loading ? <span className="loader"></span> : <><PenTool size={18} /> Tulis / Lanjutkan Episode {currentChapterIndex + 1}</>}
-                      </button>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        <TokenEstimate
+                          min={Math.round(novelData.targetWordsPerChapter * 1.3)}
+                          max={Math.round(novelData.targetWordsPerChapter * 1.8)}
+                          suffix=" / episode"
+                        />
+                        <TokenEstimate
+                          min={Math.round(countWords(novelData.chapters[currentChapterIndex] || '') * 1.5)}
+                          max={Math.round(countWords(novelData.chapters[currentChapterIndex] || '') * 1.5)}
+                          suffix=" / koreksi"
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn-secondary" onClick={handleProofreadChapter} disabled={loading} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          {loading ? <span className="loader"></span> : <><Wrench size={18} /> Koreksi AI</>}
+                        </button>
+                        <button className="btn-primary" onClick={handleGenerateChapter} disabled={loading} style={{background: 'linear-gradient(135deg, #a855f7, #6366f1)', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                          {loading ? <span className="loader"></span> : <><PenTool size={18} /> Tulis / Lanjutkan Episode {currentChapterIndex + 1}</>}
+                        </button>
+                      </div>
                     </div>
 
                     <button className="btn-primary" style={{backgroundColor: '#10b981'}} onClick={handleNextChapter}>
@@ -1735,6 +1842,9 @@ Konteks terakhir (lanjutkan dari sini):
                     {/* Left Panel: Cover & Visuals */}
                     <div className="neon-border" style={{borderRadius: '16px', padding: '24px', background: 'var(--glass-bg)'}}>
                       <h3 style={{marginBottom: '16px', fontSize: '1.2rem'}}>Cover Novel</h3>
+                      <div style={{marginBottom: '10px'}}>
+                        <TokenEstimate min={300} max={600} suffix=" / cover AI" />
+                      </div>
                       <div 
                         style={{
                           width: '100%', 

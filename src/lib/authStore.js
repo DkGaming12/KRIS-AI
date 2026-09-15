@@ -30,10 +30,11 @@ import {
   getDocs,
 } from 'firebase/firestore';
 import app, { auth, db } from './firebase';
+import { computeCharge, logUsage } from './tokenUsage';
 
 // ─── Konstanta ───────────────────────────────────────────────────────────────
 export const INITIAL_TOKEN_GRANT = 10_000;
-export const GUEST_TOKEN_BALANCE = 100;
+export const GUEST_TOKEN_BALANCE = 2_000;
 const GUEST_SESSION_KEY = 'kris_ai_guest_session';
 
 function readGuestSession() {
@@ -80,6 +81,9 @@ function clearGuestSession() {
 }
 
 // ─── Firestore helpers ───────────────────────────────────────────────────────
+
+const ADMIN_EMAILS = ['didikpurnomoipung21@gmail.com', 'didikpurnomoipu@gmail.com'];
+const isAdminUser = (user) => ADMIN_EMAILS.includes(user?.email);
 
 /** Ambil atau buat dokumen user di Firestore */
 async function ensureUserDoc(uid, email) {
@@ -312,21 +316,64 @@ export function useAuth() {
     setTokenBalance(bal);
   }, [activeUser]);
 
-  const spendTokens = useCallback(async (aiOutput) => {
-    if (!activeUser || !aiOutput) return;
-    
-    const wordCount = aiOutput.trim().split(/\\s+/).filter((w) => w.length > 0).length;
-    const tokensToSpend = Math.max(1, wordCount);
+  /**
+   * Potong saldo + catat pemakaian berdasarkan usage API asli.
+   * Dipanggil setelah request AI sukses. Tagihan = usage.total_tokens −
+   * token padding anti-WAF; bila usage null → estimasi dari panjang teks.
+   *
+   * @param {object} info - { feature, usage, padChars, fallbackInput, fallbackOutput, meta }
+   * @returns {Promise<{charged:number, balance:number}|null>
+   */
+  const spendUsage = useCallback(async (info) => {
+    if (!activeUser) return null;
+    const {
+      feature = 'fallback',
+      usage = null,
+      padChars = 0,
+      fallbackInput = '',
+      fallbackOutput = '',
+    } = info || {};
 
-    if (activeUser.isGuest) {
-      setTokenBalance(prev => Math.max(0, prev - tokensToSpend));
-      return;
+    const { charged, tokensIn, tokensOut, estimated } = computeCharge(
+      usage, padChars, fallbackInput, fallbackOutput
+    );
+
+    // Admin: unlimited — tidak dipotong, tapi tetap dicatat.
+    if (isAdminUser(activeUser)) {
+      await logUsage(null, true, { feature, tokensIn, tokensOut, charged, estimated });
+      return { charged, balance: tokenBalance };
     }
 
-    if (activeUser.email === 'didikpurnomoipung21@gmail.com' || activeUser.email === 'didikpurnomoipu@gmail.com') return; // Unlimited for admin
-    const newBalance = await spendTokensForOutput(activeUser.uid, aiOutput);
+    if (activeUser.isGuest) {
+      const newBalance = Math.max(0, tokenBalance - charged);
+      setTokenBalance(newBalance);
+      await logUsage(null, true, { feature, tokensIn, tokensOut, charged, estimated });
+      return { charged, balance: newBalance };
+    }
+
+    // Member: potong Firestore (tidak lebih dari saldo) + catat log
+    const spend = Math.min(charged, tokenBalance);
+    const ref = doc(db, 'users', activeUser.uid);
+    await updateDoc(ref, {
+      tokenBalance: increment(-spend),
+      updatedAt: serverTimestamp(),
+    });
+    await logUsage(activeUser.uid, false, { feature, tokensIn, tokensOut, charged, estimated });
+    const newBalance = Math.max(0, tokenBalance - charged);
     setTokenBalance(newBalance);
-  }, [activeUser]);
+    return { charged, balance: newBalance };
+  }, [activeUser, tokenBalance]);
+
+  /**
+   * LEGACY — dipertahankan untuk caller lama. Delegasi ke spendUsage
+   * dengan estimasi fallback dari teks output. Caller baru (metering
+   * usage API asli) memakai spendUsage.
+   */
+  const spendTokens = useCallback(async (aiOutput, feature = 'fallback') => {
+    if (!activeUser || !aiOutput) return null;
+    const outText = Array.isArray(aiOutput) ? aiOutput.join(' ') : String(aiOutput);
+    return spendUsage({ feature, fallbackOutput: outText });
+  }, [activeUser, spendUsage]);
 
   return {
     user: activeUser,
@@ -340,6 +387,7 @@ export function useAuth() {
     signOut,
     refreshToken,
     spendTokens,
+    spendUsage,
     isAuthenticated: !!activeUser,
     hasTokens: tokenBalance > 0,
   };

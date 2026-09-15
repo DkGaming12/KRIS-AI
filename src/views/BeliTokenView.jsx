@@ -1,41 +1,10 @@
 import React from 'react';
-import { Zap, CheckCircle, MessageCircle, Star } from 'lucide-react';
+import { Zap, MessageCircle, Star } from 'lucide-react';
+import { TOKEN_PACKAGES } from '../constants/tokenPackages';
 
 const WA_ADMIN_NUMBER = '6285700660475';
 
-const PACKAGES = [
-  {
-    id: 'starter',
-    name: 'Paket Starter',
-    tokens: '100.000',
-    originalPrice: 'Rp 35.000',
-    price: 'Rp 25.000',
-    desc: 'Cocok untuk penulis pemula yang ingin mencoba fitur Kris AI.',
-    color: '#38bdf8',
-    gradient: 'linear-gradient(135deg, #0ea5e9, #38bdf8)'
-  },
-  {
-    id: 'pro',
-    name: 'Paket Pro',
-    tokens: '500.000',
-    originalPrice: 'Rp 129.000',
-    price: 'Rp 100.000',
-    desc: 'Pilihan terpopuler! Selesaikan 1-2 novel dengan nyaman.',
-    color: '#a855f7',
-    gradient: 'linear-gradient(135deg, #8b5cf6, #d946ef)',
-    popular: true
-  },
-  {
-    id: 'sultan',
-    name: 'Paket Sultan',
-    tokens: '1.000.000',
-    originalPrice: 'Rp 219.000',
-    price: 'Rp 175.000',
-    desc: 'Untuk penulis produktif. Harga lebih hemat, bebas khawatir habis token.',
-    color: '#f59e0b',
-    gradient: 'linear-gradient(135deg, #f59e0b, #fbbf24)'
-  }
-];
+const PACKAGES = TOKEN_PACKAGES;
 
 export default function BeliTokenView() {
   const handleBuy = (pkg) => {
@@ -67,7 +36,7 @@ export default function BeliTokenView() {
           Tingkatkan Kreativitas Tanpa Batas
         </h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
-          Token digunakan untuk menghasilkan teks (1 kata = 1 token). Pilih paket yang sesuai dengan kebutuhan menulismu. Pembayaran aman dan token langsung ditambahkan ke akunmu.
+          Token dipotong sesuai pemakaian AI yang sebenarnya (input + output, dihitung dari token API asli). Pilih paket yang sesuai dengan kebutuhan menulismu. Pembayaran aman dan token langsung ditambahkan ke akunmu.
         </p>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '1rem', padding: '8px 14px', borderRadius: '999px', background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.2)', color: '#25d366', fontSize: '0.82rem', fontWeight: '800' }}>
           <Star size={14} /> Harga promo aktif terus

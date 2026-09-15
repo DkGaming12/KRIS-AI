@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, RefreshCw, Sparkles, Settings, ChevronRight, Coins } from 'lucide-react';
+import { X, RefreshCw, Sparkles, Settings, ChevronRight } from 'lucide-react';
 import AIResponse from './AIResponse';
+import TokenEstimate from './TokenEstimate';
 import { TOOL_DEFINITIONS } from '../constants/toolDefinitions';
 
-const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient }) => {
+const ToolModal = ({ tool, isOpen, onClose, onSave, getClient }) => {
   const [formData, setFormData] = useState({});
   const [showForm, setShowForm] = useState(true);
   const [output, setOutput] = useState('');
@@ -66,10 +67,6 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
       setErrors({});
     }
 
-    if (tokens !== undefined && tokens <= 0) {
-      return;
-    }
-
     setIsGenerating(true);
     
     const summary = Object.entries(formData).filter(([k, v]) => v).map(([k, v]) => `${k}: ${v}`).join('\n- ');
@@ -82,6 +79,7 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
       }
 
       const response = await client.chat.completions.create({
+        __feature: 'tool',
         messages: [
           { role: 'system', content: 'Anda adalah Kris Ai, asisten penulis kelas master (Sastra & Web Novel).' },
           { role: 'user', content: userPrompt }
@@ -91,15 +89,6 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
       });
 
       const generatedText = response.choices[0]?.message?.content || "Maaf, mesin tidak mengembalikan konten apa pun.";
-      
-      const wordCount = generatedText.split(/\s+/).filter(w => w.length > 0).length;
-      if (setTokens) {
-        setTokens(prev => {
-          let tokenUsed = Math.ceil((wordCount / 3500) * 12);
-          if (tokenUsed < 1 && wordCount > 0) tokenUsed = 1;
-          return Math.max(0, prev - tokenUsed);
-        });
-      }
 
       setOutput(generatedText);
       setShowForm(false);
@@ -231,12 +220,7 @@ const ToolModal = ({ tool, isOpen, onClose, onSave, tokens, setTokens, getClient
               </div>
 
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--glass-bg)', padding: '0.6rem 1rem', borderRadius: '0.8rem', border: '1px solid var(--border-color)' }}>
-                  <Coins size={16} color="#fbbf24" />
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'bold' }}>
-                    Estimasi: <span style={{ color: '#fbbf24' }}>Dinamic (Maks ~10) Token</span>
-                  </span>
-                </div>
+                <TokenEstimate min={500} max={1500} />
                 
                 <button 
                   onClick={handleGenerate}

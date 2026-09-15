@@ -13,6 +13,7 @@ import {
 } from 'docx';
 import { saveAs } from 'file-saver';
 import * as pdfjsLib from 'pdfjs-dist';
+import TokenEstimate from '../components/TokenEstimate';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
@@ -152,7 +153,7 @@ async function exportToWord(title, author, institution, markdownContent) {
 }
 
 // ─── Komponen Utama ────────────────────────────────────────────
-export default function MakalahView({ getClient, spendTokens, tokenBalance }) {
+export default function MakalahView({ getClient, tokenBalance }) {
   const [step, setStep] = useState('form');
   const [judul, setJudul] = useState('');
   const [author, setAuthor] = useState('');
@@ -216,6 +217,7 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
       const client = getClient();
       let fullText = '';
       const stream = await client.chat.completions.create({
+        __feature: 'makalah',
         model: 'openrouter/auto',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
@@ -229,7 +231,8 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
         fullText += delta;
         setMakalahContent(fullText);
       }
-      if (spendTokens) await spendTokens(fullText);
+      // Metering otomatis lewat getClient() saat stream selesai —
+      // tanpa pemotongan manual di sini.
       setStep('result');
     } catch (err) {
       console.error(err);
@@ -321,9 +324,12 @@ Buat makalah ilmiah LENGKAP dan BERKUALITAS TINGGI sesuai aturan yang telah dite
         </div>
       )}
 
-      <button onClick={handleGenerate} disabled={!judul.trim()} style={{ padding: '16px', borderRadius: '14px', background: judul.trim() ? 'linear-gradient(135deg, #7c3aed, #a855f7)' : 'var(--glass-bg)', border: 'none', color: 'white', fontWeight: '800', fontSize: '1rem', cursor: judul.trim() ? 'pointer' : 'not-allowed', opacity: judul.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: judul.trim() ? '0 8px 30px rgba(124,58,237,0.4)' : 'none', transition: 'all 0.2s' }}>
-        <Zap size={20} />Buat Makalah dengan AI
-      </button>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <TokenEstimate min={3000} max={5000} suffix=" / makalah" />
+        <button onClick={handleGenerate} disabled={!judul.trim()} style={{ width: '100%', padding: '16px', borderRadius: '14px', background: judul.trim() ? 'linear-gradient(135deg, #7c3aed, #a855f7)' : 'var(--glass-bg)', border: 'none', color: 'white', fontWeight: '800', fontSize: '1rem', cursor: judul.trim() ? 'pointer' : 'not-allowed', opacity: judul.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', boxShadow: judul.trim() ? '0 8px 30px rgba(124,58,237,0.4)' : 'none', transition: 'all 0.2s' }}>
+          <Zap size={20} />Buat Makalah dengan AI
+        </button>
+      </div>
     </div>
   );
 

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Sparkles, MessageSquare, ShoppingCart, Zap } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { BrainCircuit } from 'lucide-react';
+import TokenEstimate from '../components/TokenEstimate';
 import { WA_BUY_LINK } from '../components/TokenEmptyModal';
 
 const RenderMessageContent = ({ content }) => {
@@ -36,7 +37,7 @@ const RenderMessageContent = ({ content }) => {
   );
 };
 
-export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
+export default function ChatAIView({ getClient, tokenBalance }) {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Halo! Saya Kris AI, Sastra Engine V8. Saya siap bantu penulisan novel, coding, debugging, dan ide kreatif lainnya. Apa yang ingin Anda kerjakan hari ini?' }
   ]);
@@ -65,6 +66,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
     try {
       const client = getClient();
       const response = await client.chat.completions.create({
+        __feature: 'chat',
         messages: [
           { role: "system", content: "Anda adalah Kris AI, pakar penulisan novel fiksi yang sangat membantu, kreatif, dan ahli dalam menyusun cerita, world building, dan penokohan. Saat ditanya siapa penciptamu, jawablah dengan detail bahwa Anda diciptakan oleh Didi Purnomo, seorang mahasiswa Informatika dari UIN Gusdur Pekalongan. Tambahkan gaya bahasa yang keren dan bangga saat menceritakannya." },
           ...newMessages.map(m => ({ role: m.role, content: m.content }))
@@ -75,10 +77,7 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
 
       const aiContent = response.choices[0].message.content;
 
-      // Kurangi token diam-diam — user tidak diberitahu nominal
-      if (spendTokens && aiContent) {
-        spendTokens(aiContent).catch(() => {});
-      }
+      // Metering otomatis lewat getClient() — tanpa pemotongan manual di sini.
 
       setMessages([...newMessages, { role: 'assistant', content: aiContent }]);
     } catch (err) {
@@ -229,6 +228,9 @@ export default function ChatAIView({ getClient, spendTokens, tokenBalance }) {
               >
                 <Send size={16} />
               </button>
+            </div>
+            <div style={{ marginTop: '8px' }}>
+              <TokenEstimate min={300} max={800} suffix=" / jawaban" />
             </div>
           </div>
         )}

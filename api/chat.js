@@ -50,9 +50,15 @@ function padUserMessage(text) {
   );
 }
 
-/** Terapkan padding anti content-block pada body request OpenAI-format */
+/**
+ * Terapkan padding anti content-block pada body request OpenAI-format.
+ * Mengembalikan { body, padChars } — padChars = total karakter padding yang
+ * disisipkan (dilaporkan ke klien via header X-Kris-Pad-Chars supaya
+ * pemakaian token user tidak menagih biaya artifisial WAF ini).
+ */
 function applyPadding(body) {
   const messages = (body.messages || []).map((m) => ({ ...m }));
+  let padChars = 0;
 
   for (let i = messages.length - 1; i >= 0; i--) {
     const m = messages[i];
@@ -60,17 +66,21 @@ function applyPadding(body) {
     if (m.role === 'user') {
       // Padding hanya pada pesan user TERAKHIR — history dibiarkan apa
       // adanya supaya token tidak membengkak.
+      const original = m.content;
       m.content = padUserMessage(m.content);
+      padChars += m.content.length - original.length;
       break;
     }
     if (m.role === 'system') {
       // System prompt web (persona, aturan penulisan) berbahasa Indonesia
       // dan ikut memicu filter — bungkus dengan framing Inggris.
+      const original = m.content;
       m.content = buildPadding(m.content.length) + '\n\n' + m.content;
+      padChars += m.content.length - original.length;
     }
   }
 
-  return { ...body, messages };
+  return { body: { ...body, messages }, padChars };
 }
 
 /** Resolve konfigurasi secara lazy supaya env tetap bisa di-inject saat dev */
@@ -167,9 +177,11 @@ export default async function handler(req, res) {
 
   if (!body.model || body.model === 'auto') body.model = defaultModel;
 
+  const { body: paddedBody, padChars } = applyPadding(body);
+
   const upstream = await callAgentRouter(config, {
     apiKey,
-    body: applyPadding(body),
+    body: paddedBody,
     stream: Boolean(body.stream),
   });
 
@@ -196,6 +208,7 @@ export default async function handler(req, res) {
       'Cache-Control': 'no-cache, no-transform',
       Connection: 'keep-alive',
       'X-Accel-Buffering': 'no',
+      'X-Kris-Pad-Chars': String(padChars),
     });
 
     if (!upstream.body) {
@@ -225,5 +238,6 @@ export default async function handler(req, res) {
     return;
   }
 
+  res.setHeader('X-Kris-Pad-Chars', String(padChars));
   res.status(upstream.status).json(json);
 }

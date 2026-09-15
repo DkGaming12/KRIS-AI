@@ -355,6 +355,56 @@ html {
 
 .main-content-area { width: 100%; }
 
+/* ===================== TOKEN METERING (estimasi + toast) ===================== */
+.token-estimate-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.token-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.token-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.token-toast svg { color: #fbbf24; flex-shrink: 0; }
+.token-toast-label { font-weight: 700; }
+.token-toast-amount {
+  font-weight: 800;
+  color: #fbbf24;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-color);
+}
+
 /* ===================== FORMS ===================== */
 .form-group { margin-bottom: 1.25rem; }
 .form-group > label {

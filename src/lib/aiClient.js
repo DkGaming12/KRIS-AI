@@ -89,15 +89,33 @@ async function createAgentRouterChatCompletion(params) {
     throw new Error(errorText || `AgentRouter proxy gagal (${response.status})`);
   }
 
+  // Jumlah karakter padding anti-WAF yang disisipkan server — dipakai
+  // metering token supaya padding tidak ditagih ke user.
+  const padChars = parseInt(response.headers.get('X-Kris-Pad-Chars') || '0', 10) || 0;
+
   if (params.stream) {
     if (!response.body) {
       throw new Error('Stream respons AgentRouter tidak tersedia.');
     }
-
-    return createSseAsyncIterable(response.body);
+    // Bungkus iterable: tangkap chunk ber-`usage` (dikirim upstream di akhir
+    // stream bila stream_options.include_usage aktif) tanpa mengubah output.
+    const inner = createSseAsyncIterable(response.body);
+    let capturedUsage = null;
+    async function* streamWithUsageCapture() {
+      for await (const chunk of inner) {
+        if (chunk?.usage) capturedUsage = chunk.usage;
+        yield chunk;
+      }
+      return { usage: capturedUsage, padChars };
+    }
+    const wrapper = streamWithUsageCapture();
+    wrapper.__krisMeta = () => ({ usage: capturedUsage, padChars });
+    return wrapper;
   }
 
-  return response.json();
+  const json = await response.json();
+  json.__krisPadChars = padChars;
+  return json;
 }
 
 const PROVIDERS = [
@@ -271,7 +289,16 @@ function resolveModel(provider, requestedModel) {
  * @param {Function} onProviderSwitch - callback(providerName) saat ganti provider
  * @returns {Promise<import('openai').ChatCompletion>}
  */
-export async function chatWithFallback(params, onProviderSwitch) {
+/**
+ * Kirim chat completion dengan fallback antar provider.
+ * @param {object} params - parameter OpenAI-format
+ * @param {object|function} [optsOrCb] - { onProviderSwitch, onUsage } (atau
+ *   callback onProviderSwitch lama — kompatibilitas)
+ *   onUsage({ usage, padChars, params }) dipanggil SEKALI setelah sukses,
+ *   dengan usage asli API (bisa null) + padChars padding anti-WAF.
+ */
+export async function chatWithFallback(params, optsOrCb) {
+  const opts = typeof optsOrCb === 'function' ? { onProviderSwitch: optsOrCb } : (optsOrCb || {});
   const available = getAvailableProviders();
 
   // Kalau hanya OmniRoute yang ada di daftar dan tidak ada provider lain
@@ -289,14 +316,47 @@ export async function chatWithFallback(params, onProviderSwitch) {
       const client = buildClient(provider);
       const model = resolveModel(provider, params.model);
 
-      if (onProviderSwitch) onProviderSwitch(provider.name);
+      if (opts.onProviderSwitch) opts.onProviderSwitch(provider.name);
 
-      const result = await client.chat.completions.create({
-        ...params,
-        model,
-      });
+      // Minta upstream menyertakan usage di akhir stream (OpenAI-format).
+      const finalParams = { ...params, model };
+      if (finalParams.stream) {
+        finalParams.stream_options = { ...finalParams.stream_options, include_usage: true };
+      }
+
+      const result = await client.chat.completions.create(finalParams);
 
       localStorage.setItem('kris_ai_last_provider', provider.id);
+
+      // ── Metering: laporkan usage (asli atau null) ke pemanggil ──
+      if (finalParams.stream) {
+        if (typeof result.__krisMeta === 'function') {
+          // Provider omni (fetch manual): usage tertangkap setelah stream
+          // habis — bungkus agar onUsage terpanggil tepat saat selesai.
+          const inner = result;
+          let reported = false;
+          async function* reportOnDone() {
+            for await (const chunk of inner) {
+              yield chunk;
+            }
+            if (!reported) {
+              reported = true;
+              const meta = inner.__krisMeta();
+              try { opts.onUsage?.({ usage: meta.usage, padChars: meta.padChars, params: finalParams }); } catch (e) { console.warn('[aiClient] onUsage error:', e); }
+            }
+          }
+          return reportOnDone();
+        }
+        // Provider SDK lain: usage stream tak tertangkap — estimasi fallback.
+        try { opts.onUsage?.({ usage: null, padChars: 0, params: finalParams }); } catch (e) { console.warn('[aiClient] onUsage error:', e); }
+        return result;
+      }
+
+      // Non-stream: usage ada di result.usage (kalau upstream mengirim).
+      const usage = result?.usage || null;
+      const padChars = result?.__krisPadChars || 0;
+      try { opts.onUsage?.({ usage, padChars, params: finalParams }); } catch (e) { console.warn('[aiClient] onUsage error:', e); }
+
       return result;
     } catch (error) {
       lastError = error;

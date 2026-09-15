@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Ghost, PenTool, Sparkles, Wand2 } from 'lucide-react';
+import TokenEstimate from '../components/TokenEstimate';
 
-export default function GhostwriterView({ getClient, spendTokens }) {
+export default function GhostwriterView({ getClient }) {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -12,6 +13,7 @@ export default function GhostwriterView({ getClient, spendTokens }) {
     try {
       const client = getClient();
       const response = await client.chat.completions.create({
+        __feature: 'ghostwriter',
         messages: [
           { role: "system", content: "Anda adalah Ghostwriter, asisten penulis novel profesional. Lanjutkan teks yang diberikan pengguna secara mulus, perhatikan gaya bahasa, karakter, dan tone. Jangan ulangi kalimat terakhir, langsung sambung dengan kalimat baru." },
           { role: "user", content: `Lanjutkan tulisan berikut (sekitar 200-300 kata):\n\n...${content.slice(-500)}` }
@@ -19,14 +21,11 @@ export default function GhostwriterView({ getClient, spendTokens }) {
         temperature: 0.7,
         max_tokens: 2048
       });
-      
+
       let newText = response.choices[0].message.content;
       newText = newText.replace(/<think>[\s\S]*?<\/think>/, '').trim();
 
-      // Kurangi token diam-diam
-      if (spendTokens && newText) {
-        spendTokens(newText).catch(() => {});
-      }
+      // Metering otomatis lewat getClient() — tanpa pemotongan manual di sini.
 
       setContent(prev => prev + (prev.endsWith(' ') || prev.endsWith('\n') ? '' : ' ') + newText);
     } catch (err) {
@@ -48,14 +47,17 @@ export default function GhostwriterView({ getClient, spendTokens }) {
             <p className="view-subtitle">AI akan melanjutkan tulisanmu saat kamu buntu.</p>
           </div>
         </div>
-        <button
-          className="btn-primary"
-          onClick={handleContinue}
-          disabled={isLoading || !content.trim()}
-          style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)', whiteSpace: 'nowrap' }}
-        >
-          {isLoading ? <span className="loader"></span> : <><Wand2 size={16} /> Lanjutkan Tulisan</>}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          <TokenEstimate min={350} max={550} />
+          <button
+            className="btn-primary"
+            onClick={handleContinue}
+            disabled={isLoading || !content.trim()}
+            style={{ background: 'linear-gradient(135deg, #a855f7, #6366f1)', whiteSpace: 'nowrap' }}
+          >
+            {isLoading ? <span className="loader"></span> : <><Wand2 size={16} /> Lanjutkan Tulisan</>}
+          </button>
+        </div>
       </div>
 
       <div className="premium-card-v2" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden' }}>
